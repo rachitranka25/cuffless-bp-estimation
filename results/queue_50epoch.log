@@ -1,0 +1,2 @@
+[18:32:20] === queue starting, 30 training jobs ===
+[18:32:20] [1/30] START cnn calfree seed=0 tag='' {'epochs': 50}

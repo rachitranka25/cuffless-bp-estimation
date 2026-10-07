@@ -1,0 +1,180 @@
+{
+  "model": "rf",
+  "trained_on": "PulseDB calfree",
+  "tested_on": "PPG-DaLiA",
+  "config": {
+    "model": "rf",
+    "protocol": "calfree",
+    "seed": 0,
+    "cap": null,
+    "channels": [
+      0,
+      1
+    ],
+    "val_frac": 0.1,
+    "balance": true,
+    "epochs": 20,
+    "batch_size": 256,
+    "lr": 0.0003,
+    "weight_decay": 0.0001,
+    "patience": 4,
+    "width": 32,
+    "num_workers": 2,
+    "device": null,
+    "tag": "",
+    "out_dir": "",
+    "save_ckpt": true,
+    "extra": {}
+  },
+  "n_dalia_clips": 64682,
+  "n_dalia_subjects": 15,
+  "plausibility": {
+    "sbp_range": [
+      70.0,
+      200.0
+    ],
+    "dbp_range": [
+      40.0,
+      120.0
+    ],
+    "pct_sbp_impossible": 0.0,
+    "pct_dbp_impossible": 0.27210042979499705,
+    "pct_dbp_above_sbp": 0.0,
+    "pct_any_impossible": 0.27210042979499705
+  },
+  "distribution": {
+    "sbp": {
+      "pulsedb_true": {
+        "mean": 115.42987724052536,
+        "sd": 18.723679271117888,
+        "p5": 87.53405456542968,
+        "p50": 113.89726638793945,
+        "p95": 148.39175643920896
+      },
+      "pulsedb_predicted": {
+        "mean": 116.6846856497912,
+        "sd": 12.553133676874149,
+        "p5": 96.78638680786254,
+        "p50": 116.60446369206466,
+        "p95": 136.4627057349602
+      },
+      "dalia_predicted": {
+        "mean": 139.19952713697057,
+        "sd": 10.844071855642898,
+        "p5": 120.49182632176023,
+        "p50": 139.1031026293487,
+        "p95": 157.00834324681975
+      }
+    },
+    "dbp": {
+      "pulsedb_true": {
+        "mean": 63.02434536708726,
+        "sd": 11.874260143140907,
+        "p5": 44.674717330932616,
+        "p50": 62.66512680053711,
+        "p95": 83.50074081420898
+      },
+      "pulsedb_predicted": {
+        "mean": 63.365879765295695,
+        "sd": 7.148467287121979,
+        "p5": 51.827528346538635,
+        "p50": 63.2886916485288,
+        "p95": 74.98951420712487
+      },
+      "dalia_predicted": {
+        "mean": 81.82059437271698,
+        "sd": 8.55072075317978,
+        "p5": 69.64564366877349,
+        "p50": 81.1149566053773,
+        "p95": 98.11337819755971
+      }
+    }
+  },
+  "collapse": {
+    "sbp": {
+      "pulsedb_true": 11.761549135297779,
+      "pulsedb_predicted": 8.219005426666596,
+      "dalia_predicted": 2.535434573803291
+    },
+    "dbp": {
+      "pulsedb_true": 8.868871055433758,
+      "pulsedb_predicted": 5.006689985593588,
+      "dalia_predicted": 2.473134689302881
+    }
+  },
+  "by_activity": {
+    "cycling": {
+      "n": 3479,
+      "sbp_mean": 143.57181526063894,
+      "sbp_sd": 13.017484329030788,
+      "pct_impossible": 2.328255245760276
+    },
+    "driving": {
+      "n": 6838,
+      "sbp_mean": 138.25376953840575,
+      "sbp_sd": 9.373506707563417,
+      "pct_impossible": 0.029248318221702253
+    },
+    "lunch": {
+      "n": 13556,
+      "sbp_mean": 138.68854554754049,
+      "sbp_sd": 9.002179842190001,
+      "pct_impossible": 0.007376807317792859
+    },
+    "sitting": {
+      "n": 4570,
+      "sbp_mean": 141.16845389236025,
+      "sbp_sd": 8.672582672485419,
+      "pct_impossible": 0.0
+    },
+    "stairs": {
+      "n": 3243,
+      "sbp_mean": 140.38055419374547,
+      "sbp_sd": 14.84314951559259,
+      "pct_impossible": 0.8942337341967314
+    },
+    "table_soccer": {
+      "n": 2313,
+      "sbp_mean": 136.210965532414,
+      "sbp_sd": 12.97757472724883,
+      "pct_impossible": 0.0
+    },
+    "transient": {
+      "n": 17486,
+      "sbp_mean": 139.38850495043914,
+      "sbp_sd": 11.915835590065306,
+      "pct_impossible": 0.3545693697815395
+    },
+    "walking": {
+      "n": 4695,
+      "sbp_mean": 138.96559956796895,
+      "sbp_sd": 12.156793781554668,
+      "pct_impossible": 0.021299254526091587
+    },
+    "working": {
+      "n": 8502,
+      "sbp_mean": 138.03051600633037,
+      "sbp_sd": 8.12539288086498,
+      "pct_impossible": 0.0
+    }
+  },
+  "by_motion": {
+    "low_motion": {
+      "n": 19910,
+      "sbp_mean": 138.82745140519967,
+      "pct_impossible": 0.010045203415369162
+    },
+    "high_motion": {
+      "n": 44772,
+      "sbp_mean": 139.36498831403566,
+      "pct_impossible": 0.388635754489413
+    }
+  },
+  "heart_rate_crosscheck": {
+    "note": "tests the PPG pulse detector against the chest-ECG reference, not the BP model",
+    "n": 63180,
+    "mae_bpm": 27.105804468043093,
+    "low_motion_mae_bpm": 13.062439230776649,
+    "high_motion_mae_bpm": 33.35008307059222
+  }
+}

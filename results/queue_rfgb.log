@@ -1,0 +1,10 @@
+[18:52:39] === rf/gb seed queue starting, 4 jobs ===
+[18:52:39] [1/4] START rf calfree seed=1
+[19:33:08] [1/4] OK rf seed=1 (2428s)
+[19:33:08] [2/4] START gb calfree seed=1
+[19:34:04] [2/4] OK gb seed=1 (57s)
+[19:34:04] [3/4] START rf calfree seed=2
+[20:15:30] [3/4] OK rf seed=2 (2486s)
+[20:15:30] [4/4] START gb calfree seed=2
+[20:18:40] [4/4] OK gb seed=2 (190s)
+[20:18:40] === rf/gb seed queue finished ===
