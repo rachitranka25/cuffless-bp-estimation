@@ -23,3 +23,13 @@ __pycache__/
 # review, kept out of the public repo until that's resolved.
 docs/
 ieee_paper/
+
+# bp/ is a Colab staging folder assembled on demand by
+# scripts/make_drive_folder.py, which hard-links src/, notebooks/,
+# HANDOFF.md, and scripts/prepare_colab_upload.py into it. Everything
+# except README.txt here is therefore a generated duplicate of files
+# already tracked at the repository root.
+bp/src/
+bp/notebooks/
+bp/scripts/
+bp/HANDOFF.md

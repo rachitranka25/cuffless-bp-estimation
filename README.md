@@ -155,9 +155,17 @@ jupyter nbconvert --execute --inplace notebooks/01_preprocessing.ipynb
 python3 scripts/extract_features.py         # PulseDB -> data/features/
 python3 scripts/extract_features_dalia.py   # PPG-DaLiA -> data/features/dalia.parquet
 
-# training
+# training — one run
 python3 -m train --model gb --protocol calfree      # run from src/
 jupyter notebook notebooks/02_baselines.ipynb       # rf + gb, all four protocols
+
+# training — full sweeps (unattended queues; each logs to results/queue_*.log)
+python3 scripts/run_50epoch_queue.py          # cnn/resnet1d, 50 epochs, all protocols/seeds
+python3 scripts/run_transformer_sweep.py      # transformer, all 13 protocol/seed/tag jobs
+python3 scripts/run_rfgb_seeds.py             # rf/gb, calfree seeds 1-2
+python3 scripts/run_rfgb_nobalance_seeds.py   # rf/gb, calfree_nobalance seeds 1-2
+python3 scripts/run_leaky_calbased_seeds.py   # cnn/resnet1d, leaky/calbased seeds 1-2
+python3 scripts/run_schedule_fix.py           # cnn/resnet1d, decoupled lr schedule re-run
 
 # Colab, for the deep models
 python3 scripts/make_drive_folder.py        # assembles bp/ to drag into Drive
@@ -191,13 +199,25 @@ Current numbers, and how to reproduce each one, are in
 
 ### Where each run actually executed
 
-Classical models and early deep-model iterations ran locally on this machine and in
-[`bp/`](bp/) (a self-contained copy deployed to Google Colab — see
-[`bp/README.txt`](bp/README.txt) and [`bp/HANDOFF.md`](bp/HANDOFF.md)). The bulk of the
-50-epoch, three-seed CNN/ResNet1D/Random Forest/Gradient Boosting sweep ran on a Kaggle
-account; the Transformer's 19-job sweep ran on a separate workstation, following
-[`HANDOFF.md`](HANDOFF.md)'s brief. In every case the code executed was the same
-`src/train.py` entry point committed here — only the orchestration notebooks used on
-Kaggle itself were not preserved. `results/models/<model>/` holds the output of every one
-of those runs (metrics, per-clip predictions, and checkpoints for the deep models), which
-is what the manuscript's numbers are computed from.
+Classical models and early deep-model iterations ran locally on this machine. The bulk of
+the 50-epoch, three-seed CNN/ResNet1D/Random Forest/Gradient Boosting sweep ran on a
+Kaggle account, using the queue scripts above pasted into a Kaggle notebook cell (several
+of their docstrings say so explicitly). The Transformer's 13 training jobs ran on a
+separate workstation with a GPU, by hand from `notebooks/03c_transformer_colab.ipynb`
+rather than a queue script at the time — [`scripts/run_transformer_sweep.py`](scripts/run_transformer_sweep.py)
+reconstructs that job list as a script, each (protocol, seed, tag) triple checked
+against the `config` field actually recorded in the corresponding
+`results/models/transformer/*.json`. In every case the code executed was the same
+`src/train.py` entry point committed here — only the Kaggle notebook cells themselves
+were not preserved; what they contained is this repository's `run()`/`evaluate_dalia()`
+calls, which is what's in the queue scripts above.
+
+[`bp/`](bp/) is not a separate copy of the pipeline — it is a staging folder that
+[`scripts/make_drive_folder.py`](scripts/make_drive_folder.py) assembles on demand by
+hard-linking this repository's own `src/`, `notebooks/`, and `HANDOFF.md` into it for
+upload to Google Drive (see [`bp/README.txt`](bp/README.txt)); it is not committed with
+its own copy of those files.
+
+`results/models/<model>/` holds the output of every run (metrics, per-clip predictions,
+and checkpoints for the deep models), which is what the manuscript's numbers are computed
+from.
