@@ -19,8 +19,7 @@ __pycache__/
 # Local tooling, not part of the project
 .claude/
 
-# LaTeX build artifacts — paper.pdf is committed, the rest regenerates
-ieee_paper/*.aux
-ieee_paper/*.log
-ieee_paper/*.out
-ieee_paper/missfont.log
+# Manuscript drafts — not part of the code release; still under journal
+# review, kept out of the public repo until that's resolved.
+docs/
+ieee_paper/

@@ -1,7 +1,7 @@
 # Project B — Cuffless Blood Pressure Estimation
 
-TEEP research project. Spec: [`docs/TEEP_Research_Project_Proposals.md.pdf`](docs/) —
-**Project B only** (Project A, the PTB-XL ECG work, belongs to the other student).
+TEEP research project — **Project B only** (Project A, the PTB-XL ECG work, belongs
+to the other student).
 
 **Question.** How much does cuffless PPG-based BP estimation degrade under a rigorous
 subject-independent, cross-setting protocol compared to the leakage-prone evaluation
@@ -27,7 +27,6 @@ data/
 src/              importable modules — all pipeline code lives here
 scripts/          runnable jobs
 notebooks/        launchers; they call src/, they do not contain pipeline code
-docs/             the spec, and the decks written for the professor
 
 results/
   dataset/        what the data looks like — true before any model existed
@@ -184,12 +183,8 @@ Complete. All five models (RF, GB, 1D-CNN, ResNet1D, Transformer) are trained an
 under all four protocols, three seeds each where noted; the leakage gap and the PPG-DaLiA
 domain-shift control are measured; few-shot personalization is evaluated under both a
 naive (storage-order) and a genuinely chronological calibration/evaluation split; and the
-manuscript is written in two forms:
-
-- [`docs/Journal_Paper_IEEE.pdf`](docs/Journal_Paper_IEEE.pdf) — IEEE two-column format,
-  built from [`ieee_paper/paper.tex`](ieee_paper/paper.tex).
-- [`docs/Journal_Paper_ISGJ.pdf`](docs/Journal_Paper_ISGJ.pdf) — Gerontechnology journal
-  format, built from [`scripts/build_journal_paper.py`](scripts/build_journal_paper.py).
+manuscript is written and under journal review (not included in this repository while
+review is open).
 
 Current numbers, and how to reproduce each one, are in
 [`results/overview/RESULTS.md`](results/overview/RESULTS.md).
