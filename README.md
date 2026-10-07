@@ -1,4 +1,4 @@
-# Project B — Cuffless Blood Pressure Estimation
+# Project  — Cuffless Blood Pressure Estimation
 
 TEEP research project — **Project B only** (Project A, the PTB-XL ECG work, belongs
 to the other student).
