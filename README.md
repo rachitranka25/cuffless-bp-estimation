@@ -176,6 +176,7 @@ python3 scripts/run_rfgb_seeds.py             # rf/gb, calfree seeds 1-2
 python3 scripts/run_rfgb_nobalance_seeds.py   # rf/gb, calfree_nobalance seeds 1-2
 python3 scripts/run_leaky_calbased_seeds.py   # cnn/resnet1d, leaky/calbased seeds 1-2
 python3 scripts/run_schedule_fix.py           # cnn/resnet1d, decoupled lr schedule re-run
+python3 scripts/evaluate_rfgb_dalia.py        # rf/gb PPG-DaLiA domain-shift check
 
 # Colab, for the deep models
 python3 scripts/make_drive_folder.py        # assembles bp/ to drag into Drive
