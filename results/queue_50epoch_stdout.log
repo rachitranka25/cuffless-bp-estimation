@@ -1,0 +1,9 @@
+[18:32:20] === queue starting, 30 training jobs ===
+[18:32:20] [1/30] START cnn calfree seed=0 tag='' {'epochs': 50}
+
+=== cnn_calfree ===
+  train 419,040 clips / 1,164 subjects
+  test  57,600 clips from 'calfree_test' / 144 subjects (0 also in train)
+  BP-bin balancing: on
+  cnn on mps, 381,186 parameters, 419,040 train / 46,440 val / 57,600 test clips
+  epoch   1/50  train 0.7260  val 0.4193  664s

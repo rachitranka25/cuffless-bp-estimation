@@ -1,0 +1,26 @@
+# Raw and derived PulseDB/PPG-DaLiA data — not redistributable (PulseDB's
+# VitalDB portion is CC BY-NC-SA) and too large (21 GB). Code to regenerate
+# every one of these from the public sources is in src/ and scripts/.
+data/raw/
+data/processed/
+data/features/
+bp/data/
+
+# Superseded run snapshots, kept locally for history but not needed to
+# reproduce the manuscript's numbers (results/overview/RESULTS.md is
+# generated from the current results/models/ files, not from archive/).
+results/archive/
+
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store
+
+# Local tooling, not part of the project
+.claude/
+
+# LaTeX build artifacts — paper.pdf is committed, the rest regenerates
+ieee_paper/*.aux
+ieee_paper/*.log
+ieee_paper/*.out
+ieee_paper/missfont.log
