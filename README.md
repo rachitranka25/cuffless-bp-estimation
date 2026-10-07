@@ -15,6 +15,16 @@ from the run files so it cannot drift from the numbers.
 [`HANDOFF.md`](HANDOFF.md)** — state of play, the findings worth defending, the
 Windows-specific fixes, and what comes next.
 
+## Setup
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Developed and run against Python 3.13. `data/` and `bp/data/` are not included (see
+[The data](#the-data) below for sources); everything else needed to regenerate them,
+train every model, and reproduce every figure and table is in this repository.
+
 ## Layout
 
 ```
