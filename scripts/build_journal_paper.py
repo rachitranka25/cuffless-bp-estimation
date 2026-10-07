@@ -679,29 +679,32 @@ para(doc, "A second, independent label-free check is the fraction of each "
           "model's PPG-DaLiA predictions that fall outside physiologically "
           "plausible clinical range (SBP outside 70-200 mmHg or DBP outside "
           "40-120 mmHg; Table 5). No model ever predicts DBP above SBP for "
-          "the same clip. Beyond that, the rate of out-of-range predictions "
-          "spans two orders of magnitude by architecture, from 0.5% "
-          "(Transformer) to 29.7% (Gradient Boosting); the two classical "
-          "ensembles produce an implausible prediction on roughly one clip "
-          "in four to one in three, while the three deep models stay under "
-          "3.4%. This is a plausibility check rather than an accuracy check "
-          "— it does not require true labels and cannot confirm a "
-          "prediction is correct, only flag predictions that are certainly "
-          "wrong — and it reinforces this study's feature-representation "
+          "the same clip, and the absolute rate of out-of-range predictions "
+          "is low for every architecture (at most 192 of 64,682 clips). It "
+          "is nonetheless strongly architecture-dependent: Random Forest "
+          "and Gradient Boosting produce an implausible prediction roughly "
+          "8-9 times as often as the 1D-CNN and roughly 35-65 times as "
+          "often as ResNet1D and the Transformer, which produce at most 5 "
+          "and 3 implausible clips respectively out of 64,682. This is a "
+          "plausibility check rather than an accuracy check — it does not "
+          "require true labels and cannot confirm a prediction is correct, "
+          "only flag predictions that are certainly wrong — and, though "
+          "every rate is small in absolute terms, the architecture-"
+          "dependent pattern reinforces this study's feature-representation "
           "finding that representation choice affects out-of-distribution "
           "behaviour beyond what calibration-free MAE alone shows.")
 
 caption(doc, "Table 5", "Physiologically implausible predictions on "
              "PPG-DaLiA (% of clips outside SBP 70-200 mmHg or DBP "
-             "40-120 mmHg), all five models. DBP exceeding SBP on the same "
-             "clip: 0.0% for every model.")
+             "40-120 mmHg, n=64,682), all five models. DBP exceeding SBP "
+             "on the same clip: 0.0% for every model.")
 t_plausible_rows = [
     ["Model", "SBP out of range", "DBP out of range", "Any"],
-    ["Random Forest", "0.0%", "27.2%", "27.2%"],
-    ["Gradient Boosting", "13.8%", "25.7%", "29.7%"],
-    ["1D-CNN", "2.0%", "2.2%", "3.4%"],
-    ["ResNet1D", "0.0%", "0.8%", "0.8%"],
-    ["Transformer", "0.3%", "0.5%", "0.5%"],
+    ["Random Forest", "0.000%", "0.272%", "0.272%"],
+    ["Gradient Boosting", "0.138%", "0.257%", "0.297%"],
+    ["1D-CNN", "0.020%", "0.022%", "0.034%"],
+    ["ResNet1D", "0.000%", "0.008%", "0.008%"],
+    ["Transformer", "0.003%", "0.005%", "0.005%"],
 ]
 make_table(doc, t_plausible_rows, col_widths_mm=[40, 35, 35, 25])
 doc.add_paragraph()
