@@ -178,6 +178,10 @@ python3 scripts/run_leaky_calbased_seeds.py   # cnn/resnet1d, leaky/calbased see
 python3 scripts/run_schedule_fix.py           # cnn/resnet1d, decoupled lr schedule re-run
 python3 scripts/evaluate_rfgb_dalia.py        # rf/gb PPG-DaLiA domain-shift check
 
+# reproducibility checks (fast — seconds to a few minutes, no training)
+python3 scripts/test_subject_disjointness.py  # verifies every protocol's leakage property
+python3 scripts/bootstrap_ci.py               # patient-level bootstrap CIs + gap significance test
+
 # Colab, for the deep models
 python3 scripts/make_drive_folder.py        # assembles bp/ to drag into Drive
 python3 scripts/build_notebooks.py          # regenerates the launcher notebooks

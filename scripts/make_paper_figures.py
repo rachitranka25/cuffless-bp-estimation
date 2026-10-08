@@ -68,6 +68,7 @@ fig.suptitle("The four evaluation protocols differ only in which patients and "
              "clips are assigned to the test set", fontsize=11.5, weight="bold", y=1.04)
 plt.tight_layout()
 fig.savefig(OUT, bbox_inches="tight")
+fig.savefig(OUT.with_suffix(".pdf"), bbox_inches="tight")
 print("saved", OUT)
 
 # --------------------------------------------------------------------------- #
@@ -106,6 +107,7 @@ fig2.suptitle("BP-bin weighting's cost and benefit, all five models", fontsize=1
               weight="bold", y=1.03)
 plt.tight_layout()
 fig2.savefig(OUT2, bbox_inches="tight")
+fig2.savefig(OUT2.with_suffix(".pdf"), bbox_inches="tight")
 print("saved", OUT2)
 
 # --------------------------------------------------------------------------- #
@@ -184,6 +186,7 @@ cbar.set_label("bias, predicted minus true (mmHg)  —  blue = reads low, red = 
 fig3.suptitle("Bland-Altman bias and 95% limits of agreement, all five models, all four protocols",
               fontsize=12, weight="bold", y=1.02)
 fig3.savefig(OUT3, bbox_inches="tight")
+fig3.savefig(OUT3.with_suffix(".pdf"), bbox_inches="tight")
 print("saved", OUT3)
 
 # --------------------------------------------------------------------------- #
@@ -203,7 +206,7 @@ def _history(model, protocol):
 
 
 fig4, axes4 = plt.subplots(2, len(PROTO_ORDER), figsize=(3.5 * len(PROTO_ORDER), 6.8),
-                            sharex="col")
+                            sharex="col", sharey=True)
 for row, m in enumerate(("cnn", "resnet")):
     for col, proto in enumerate(PROTO_ORDER):
         ax = axes4[row][col]
@@ -233,4 +236,5 @@ fig4.suptitle("1D-CNN (top) and ResNet1D (bottom) training/validation loss, all 
               "architectures.", fontsize=11.5, weight="bold", y=1.02)
 plt.tight_layout()
 fig4.savefig(OUT4, bbox_inches="tight")
+fig4.savefig(OUT4.with_suffix(".pdf"), bbox_inches="tight")
 print("saved", OUT4)

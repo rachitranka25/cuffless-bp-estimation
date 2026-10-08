@@ -61,7 +61,8 @@ def rows(protocol):
 
 def save(fig, name):
     fig.savefig(OUT / name)
-    print("saved", (OUT / name).relative_to(ROOT))
+    fig.savefig((OUT / name).with_suffix(".pdf"))
+    print("saved", (OUT / name).relative_to(ROOT), "(+ .pdf)")
     plt.close(fig)
 
 

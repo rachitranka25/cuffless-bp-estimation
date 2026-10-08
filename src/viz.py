@@ -2,18 +2,29 @@
 
 Hues are assigned in fixed order and by entity, never cycled and never by rank:
 ECG is always blue, PPG always orange, ABP always aqua; leaky/honest/calfree keep
-their own three colours wherever they appear. The three-slot categorical set is
-validated for all-pairs colour-vision separation, and identity is never carried by
-colour alone — every figure also labels its series.
+their own three colours wherever they appear. Identity is never carried by colour
+alone — every figure also labels its series.
+
+The five categorical colours below (BLUE/ORANGE/AQUA/YELLOW/VIOLET) are chosen
+from Okabe & Ito (2008)'s colour-blind-safe set and verified, not assumed: every
+pairwise combination actually used together in this project's figures (the
+four-protocol set and the five-model set) was checked with colorspacious's
+Machado/Oliveira/Fernandes (2009) CVD simulation across deuteranomaly,
+protanomaly, and tritanomaly at full severity, requiring CAM02-UCS deltaE >= 20
+(the two sets' worst pairwise deltaE are 30.8 and 24.2 respectively — see
+scripts/check_palette_safety.py, which reproduces this check). Names reflect
+each colour's closest hue family, not a literal "aqua" or "violet" swatch —
+AQUA is a sky blue and VIOLET a wine red, both chosen for separation from the
+rest of their set over strict naming purity.
 """
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-# Categorical slots, fixed order.
-BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"
-YELLOW, MAGENTA, GREEN, VIOLET, RED = ("#eda100", "#e87ba4", "#008300",
-                                       "#4a3aa7", "#e34948")
+# Categorical slots, fixed order — colour-blind-safe set (see docstring above).
+BLUE, ORANGE, AQUA = "#0072B2", "#D55E00", "#56B4E9"
+YELLOW, MAGENTA, GREEN, VIOLET, RED = ("#F0E442", "#e87ba4", "#008300",
+                                       "#882255", "#e34948")
 
 # Entity -> colour. Never reassign these.
 CH = {"ecg": BLUE, "ppg": ORANGE, "abp": AQUA}
@@ -26,8 +37,13 @@ MUTED = "#8a8a85"
 GRID = "#e3e3df"
 SURFACE = "#fcfcfb"
 
-# Status colours are reserved and never used as a series.
-OK, WARN, BAD = "#1baf7a", "#eda100", "#e34948"
+# Status colours are reserved and never used as a series. OK uses a teal
+# rather than a pure green specifically because green-vs-red (not teal-vs-red)
+# is the classic deuteranopia/protanopia confusion; verified pairwise (see
+# scripts/check_palette_safety.py's STATUS set, worst-case deltaE 22.1) —
+# every PASS/FAIL cell this colours also prints its own text label, so colour
+# is reinforcement, not the only signal.
+OK, WARN, BAD = "#00796B", "#F0E442", "#CC3311"
 
 
 def use_style():
@@ -56,7 +72,7 @@ def use_style():
         "lines.solid_capstyle": "round",
         "font.size": 9,
         "figure.dpi": 120,
-        "savefig.dpi": 130,
+        "savefig.dpi": 300,
         "savefig.bbox": "tight",
     })
 

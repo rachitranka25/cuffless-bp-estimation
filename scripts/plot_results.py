@@ -64,11 +64,18 @@ MODEL_LABEL = {"rf": "Random Forest", "gb": "Gradient Boosting", "cnn": "1D-CNN"
 
 
 def save(fig, name, model=None):
-    """Cross-model figures go to overview/; single-model ones live with the model."""
+    """Cross-model figures go to overview/; single-model ones live with the model.
+
+    Saves both the raster PNG (for quick viewing, and for the ISGJ/docx paper,
+    which cannot embed vector graphics) and a vector PDF alongside it (for the
+    IEEE/LaTeX paper, which can — infinite-resolution text and lines, no
+    re-rasterising at print size).
+    """
     out = model_dir(model, "figures") if model else OVERVIEW
     out.mkdir(parents=True, exist_ok=True)
     fig.savefig(out / name)
-    print("  saved", (out / name).relative_to(ROOT))
+    fig.savefig((out / name).with_suffix(".pdf"))
+    print("  saved", (out / name).relative_to(ROOT), "(+ .pdf)")
     plt.close(fig)
 
 
@@ -175,7 +182,7 @@ def fig_leakage_gap(runs):
             viz.despine(ax)
     axes[0][0].legend(ncol=2, loc="upper left", fontsize=8.4)
     fig.suptitle("Same model, same training clips — only the test patients change.  "
-                 "Orange = the model had already met them; blue and green = it had not.",
+                 "Orange/yellow = the model had already met them; blue/sky blue = it had not.",
                  fontsize=12.5, weight="bold", x=0.006, ha="left", y=1.0)
     plt.tight_layout()
     save(fig, "1_leakage_gap.png")
