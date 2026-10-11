@@ -21,8 +21,8 @@ Two things are reported:
 
 2. A paired bootstrap test of this study's central claim — that the
    calibration-free leakage gap is architecture-dependent — specifically for
-   its two extremes, ResNet1D (largest gap, 2.28x) and the Transformer
-   (smallest gap, 1.09x). Each bootstrap iteration draws one patient resample
+   its two extremes, ResNet1D (largest gap) and the Transformer
+   (smallest gap). Each bootstrap iteration draws one patient resample
    per test set (calfree, leaky, calbased) and reuses the SAME resample
    indices for both architectures before computing each one's gap, which is
    the paired design: it cancels shared test-set sampling variance and
@@ -45,9 +45,16 @@ MODEL_LABEL = {"rf": "Random Forest", "gb": "Gradient Boosting", "cnn": "1D-CNN"
 N_BOOT = 2000
 RNG_SEED = 0
 
+# CNN/ResNet1D's plain calfree checkpoint is schedule-confounded (see the
+# OneCycleLR-confound analysis); the canonical calfree result used everywhere
+# else for these two models is the schedule-fixed checkpoint instead.
+CALFREE_CANONICAL_TAG = {"cnn": "schedfix", "resnet": "schedfix"}
+
 
 def load(model, protocol):
-    p = MODEL_RESULTS / model / f"{model}_{protocol}_predictions.npz"
+    tag = CALFREE_CANONICAL_TAG.get(model, "") if protocol == "calfree" else ""
+    suffix = f"_{tag}" if tag else ""
+    p = MODEL_RESULTS / model / f"{model}_{protocol}{suffix}_predictions.npz"
     z = np.load(p, allow_pickle=True)
     return z["y_true"], z["y_pred"], z["subjects"]
 
@@ -55,6 +62,39 @@ def load(model, protocol):
 def mae(y_true, y_pred, idx, target):
     k = 0 if target == "sbp" else 1
     return np.abs(y_pred[idx, k] - y_true[idx, k]).mean()
+
+
+# Exactly which (model, protocol) cells Table IV reports as a 3-seed mean
+# (marked *) vs a single run — this is cell-specific, not uniform per model:
+# calfree is 3-seed for rf/gb/transformer but a single schedule-fixed run
+# (marked †, deliberately not seed-averaged) for cnn/resnet; leaky/calbased
+# is 3-seed for cnn/resnet/transformer but single-run for rf/gb. Guessing a
+# uniform per-model rule here was exactly the earlier bug (it silently
+# 3-seed-averaged cnn/resnet's calfree using the wrong, non-schedule-fixed
+# seed1/seed2 files) — this table is transcribed directly from Table IV's
+# own */† annotations instead.
+THREE_SEED_CELLS = {
+    ("rf", "calfree"), ("gb", "calfree"), ("transformer", "calfree"),
+    ("cnn", "leaky"), ("cnn", "calbased"),
+    ("resnet", "leaky"), ("resnet", "calbased"),
+    ("transformer", "leaky"), ("transformer", "calbased"),
+}
+
+
+def canonical_seen_patient_mae(model, protocol, target):
+    """The exact Table-IV value for this cell: 3-seed mean where Table IV
+    marks it with *, else the single canonical run (schedule-fixed where
+    applicable, via load()'s CALFREE_CANONICAL_TAG)."""
+    if (model, protocol) not in THREE_SEED_CELLS:
+        y_true, y_pred, _ = load(model, protocol)
+        return mae(y_true, y_pred, np.arange(len(y_true)), target)
+    vals = []
+    for tag in ("", "seed1", "seed2"):
+        p = MODEL_RESULTS / model / f"{model}_{protocol}{'_' + tag if tag else ''}_predictions.npz"
+        z = np.load(p, allow_pickle=True)
+        y_true, y_pred = z["y_true"], z["y_pred"]
+        vals.append(mae(y_true, y_pred, np.arange(len(y_true)), target))
+    return float(np.mean(vals))
 
 
 def patient_groups(subjects):
@@ -72,16 +112,19 @@ def resample_indices(uniq, groups, rng):
     return np.concatenate([groups[s] for s in drawn])
 
 
-def bootstrap_mae_ci(y_true, y_pred, subjects, target, n_boot=N_BOOT, seed=RNG_SEED):
+def bootstrap_mae_ci(y_true, y_pred, subjects, target, canonical_point, n_boot=N_BOOT, seed=RNG_SEED):
     rng = np.random.default_rng(seed)
-    point = mae(y_true, y_pred, np.arange(len(subjects)), target)
+    seed0_point = mae(y_true, y_pred, np.arange(len(subjects)), target)
     uniq, groups = patient_groups(subjects)
     draws = np.empty(n_boot)
     for b in range(n_boot):
         idx = resample_indices(uniq, groups, rng)
         draws[b] = mae(y_true, y_pred, idx, target)
     lo, hi = np.percentile(draws, [2.5, 97.5])
-    return point, lo, hi
+    # recentre on the canonical (Table-IV-matching) point estimate, keeping
+    # the bootstrap-estimated width — see canonical_seen_patient_mae's note
+    offset = canonical_point - seed0_point
+    return canonical_point, lo + offset, hi + offset
 
 
 print("=" * 78)
@@ -90,8 +133,10 @@ print("=" * 78)
 print(f"{'Model':18s} {'SBP MAE [95% CI]':28s} {'DBP MAE [95% CI]':28s}")
 for m in MODEL_ORDER:
     y_true, y_pred, subjects = load(m, "calfree")
-    sbp_pt, sbp_lo, sbp_hi = bootstrap_mae_ci(y_true, y_pred, subjects, "sbp")
-    dbp_pt, dbp_lo, dbp_hi = bootstrap_mae_ci(y_true, y_pred, subjects, "dbp")
+    sbp_canon = canonical_seen_patient_mae(m, "calfree", "sbp")
+    dbp_canon = canonical_seen_patient_mae(m, "calfree", "dbp")
+    sbp_pt, sbp_lo, sbp_hi = bootstrap_mae_ci(y_true, y_pred, subjects, "sbp", sbp_canon)
+    dbp_pt, dbp_lo, dbp_hi = bootstrap_mae_ci(y_true, y_pred, subjects, "dbp", dbp_canon)
     print(f"{MODEL_LABEL[m]:18s} "
           f"{sbp_pt:5.2f} [{sbp_lo:5.2f}, {sbp_hi:5.2f}]{'':6s} "
           f"{dbp_pt:5.2f} [{dbp_lo:5.2f}, {dbp_hi:5.2f}]")
@@ -120,7 +165,16 @@ for target in ("sbp", "dbp"):
         data = {proto: load(m, proto) for proto in ("calfree", "leaky", "calbased")}
         groups = {proto: patient_groups(v[2]) for proto, v in data.items()}
         full = lambda yt, yp: mae(yt, yp, np.arange(len(yt)), target)
-        point_gap = full(*data["calfree"][:2]) / (
+
+        # canonical point estimate (matches Table IV: 3-seed mean where it exists)
+        point_gap = canonical_seen_patient_mae(m, "calfree", target) / (
+            (canonical_seen_patient_mae(m, "leaky", target)
+             + canonical_seen_patient_mae(m, "calbased", target)) / 2)
+        # seed-0-only point, for recentring the bootstrap draws below (the
+        # patient resample is only computed against seed 0's split; shifting
+        # by the seed-0-vs-canonical offset keeps the bootstrap's estimated
+        # width while centring the interval on the canonical point estimate)
+        seed0_point = full(*data["calfree"][:2]) / (
             (full(*data["leaky"][:2]) + full(*data["calbased"][:2])) / 2)
 
         rng = np.random.default_rng(RNG_SEED)
@@ -128,6 +182,8 @@ for target in ("sbp", "dbp"):
         for b in range(N_BOOT):
             draws[b] = gap_draw(data, groups, target, rng)
         lo, hi = np.percentile(draws, [2.5, 97.5])
+        offset = point_gap - seed0_point
+        lo, hi = lo + offset, hi + offset
         print(f"  {MODEL_LABEL[m]:18s} gap = {point_gap:.2f}x  [{lo:.2f}x, {hi:.2f}x]")
 
 print()
@@ -165,6 +221,14 @@ def paired_gap_diff(model_a, model_b, target, n_boot=N_BOOT, seed=RNG_SEED):
 for target in ("sbp", "dbp"):
     diffs = paired_gap_diff("resnet", "transformer", target)
     lo, hi = np.percentile(diffs, [2.5, 97.5])
+
+    canonical_gap = lambda m: canonical_seen_patient_mae(m, "calfree", target) / (
+        (canonical_seen_patient_mae(m, "leaky", target)
+         + canonical_seen_patient_mae(m, "calbased", target)) / 2)
+    canonical_diff = canonical_gap("resnet") - canonical_gap("transformer")
+    offset = canonical_diff - diffs.mean()
+    lo, hi = lo + offset, hi + offset
+
     sig = "excludes zero -> significant at 5%" if (lo > 0 or hi < 0) else "includes zero -> not significant at 5%"
     print(f"{target.upper()}: gap_ResNet1D - gap_Transformer = "
-          f"{diffs.mean():+.2f}x  95% CI [{lo:+.2f}x, {hi:+.2f}x]  ({sig})")
+          f"{canonical_diff:+.2f}x  95% CI [{lo:+.2f}x, {hi:+.2f}x]  ({sig})")

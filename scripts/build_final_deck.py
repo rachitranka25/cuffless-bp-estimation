@@ -1555,4 +1555,112 @@ d.text(s, .6, bottom + .2, 12.1, 1.5, [
     "is chosen.",
 ], size=10.5, color=INK2, space_after=2)
 
+# ══════════════════════════════════════════════════════════════ 41. manuscript-readiness overview, round 4
+s = d.slide("Round 4", "The professor's fourth round — five items")
+rows = [
+    ["1", "Patient-level bootstrap CI for the test-set sampling", "DONE — next slide"],
+    ["2", "Formal significance test, architecture-dependent gap claim", "DONE — next slide"],
+    ["3", "Reproducibility packaging (README, pinned deps, automated test)", "DONE"],
+    ["4", "Figure polish (colour-blind palette, vector export, scales)", "DONE"],
+    ["5", "Primary framing decision — benchmark-methodology paper vs. "
+          "personalization-results paper", "OPEN — see last slide"],
+]
+bottom = d.table(s, .6, 2.3, 12.1, rows, col_w=[.6, 7.8, 3.7], size=11, row_h=.56)
+d.text(s, .6, bottom + .2, 12.1, .5, [
+    "Items 1-4 close out everything checkable before a venue is chosen. Item 5 is an "
+    "editorial call, not a technical one — it needs a decision, not more analysis.",
+], size=10.5, color=MUTED, space_after=1)
+
+# ══════════════════════════════════════════════════════════════ 42. items 1-2 — bootstrap CI + significance test
+s = d.slide("Items 1-2", "Patient-level bootstrap CI, and a formal test of the gap claim")
+d.text(s, .6, 2.1, 12.1, .3,
+       "A SECOND, INDEPENDENT INTERVAL — TEST-SET SAMPLING, NOT TRAINING SEEDS", size=11,
+       color=BLUE, bold=True)
+rows = [["Model", "SBP MAE, 95% CI", "DBP MAE, 95% CI"],
+        ["Random Forest", "12.76 [11.86, 13.76]", "8.38 [7.78, 9.01]"],
+        ["Gradient Boosting", "14.63 [13.49, 15.89]", "9.00 [8.35, 9.68]"],
+        ["1D-CNN", "15.32 [14.24, 16.53]", "9.20 [8.42, 10.07]"],
+        ["ResNet1D", "13.96 [12.96, 15.07]", "9.03 [8.41, 9.74]"],
+        ["Transformer", "15.44 [14.23, 16.64]", "8.47 [7.81, 9.13]"]]
+bottom = d.table(s, .6, 2.45, 12.1, rows, col_w=[3.4, 4.35, 4.35], size=10, row_h=.4)
+d.text(s, .6, bottom + .15, 12.1, .25,
+       "2,000-resample patient-level cluster bootstrap, computed from each model's saved "
+       "per-clip predictions — no retraining. Every point estimate matches Table IV exactly.",
+       size=9.5, color=MUTED, space_after=1)
+d.text(s, .6, bottom + .65, 12.1, .25, "THE FORMAL TEST — RESNET1D (LARGEST GAP) VS. "
+       "TRANSFORMER (SMALLEST)", size=11, color=BLUE, bold=True)
+d.text(s, .6, bottom + .95, 12.1, 1.0, [
+    "Same resample reused for both architectures in every iteration (paired design — "
+    "cancels shared test-set sampling variance): gap_ResNet1D - gap_Transformer = "
+    "+1.19x SBP, 95% CI [+1.05x, +1.34x]; +1.28x DBP, 95% CI [+1.13x, +1.42x].",
+    "Both intervals exclude zero — the architecture-dependence of the calibration-free "
+    "gap is significant at the 5% level, not only descriptively stable across the three "
+    "training seeds reported earlier in this deck.",
+], size=10.5, color=INK2, space_after=3)
+
+# ══════════════════════════════════════════════════════════════ 43. item 3 — reproducibility packaging
+s = d.slide("Item 3", "Reproducibility packaging")
+rows = [["What", "Where", "What it does"],
+        ["Pinned dependencies", "requirements.txt", "Exact versions this project was "
+         "run against, checked against src/ and scripts/'s actual imports (AST-parsed, "
+         "not guessed)"],
+        ["Leakage-property test", "scripts/test_subject_disjointness.py", "Verifies every "
+         "protocol's train/test subject-overlap guarantee in seconds, no training needed"],
+        ["Palette-safety test", "scripts/check_palette_safety.py", "Verifies the figure "
+         "colour palette against a real colour-vision-deficiency simulation"],
+        ["Setup instructions", "README.md", "Install steps, full script inventory, and an "
+         "honest account of what ran on this machine vs. Kaggle vs. the professor's PC"]]
+bottom = d.table(s, .6, 2.3, 12.1, rows, col_w=[2.3, 3.6, 6.2], size=9.5, row_h=.62)
+d.text(s, .6, bottom + .2, 12.1, .5, [
+    "All four are runnable in seconds to minutes, independent of the 20 GB raw dataset "
+    "and without a GPU — a reviewer can check the leakage-control claim this project is "
+    "built on without reproducing a single training run.",
+], size=10.5, color=INK2, space_after=2)
+
+# ══════════════════════════════════════════════════════════════ 44. item 4 — figure polish
+s = d.slide("Item 4", "Figure polish")
+d.text(s, .6, 2.1, 12.1, .3, "COLOUR-BLIND SAFETY — VERIFIED, NOT ASSUMED", size=11,
+       color=BLUE, bold=True)
+d.text(s, .6, 2.45, 12.1, .9, [
+    "The old palette's worst-case pairwise colour difference under deuteranomaly was "
+    "11.9 (CAM02-UCS deltaE) — specifically leaky vs. calbased, and Gradient Boosting "
+    "vs. 1D-CNN, both genuinely hard to tell apart. The new palette (Okabe & Ito, 2008) "
+    "scores 22.1-24.2 worst-case across deuteranomaly, protanomaly, and tritanomaly, for "
+    "every colour set this project actually uses together.",
+], size=10.5, color=INK2, space_after=2)
+rows = [["Change", "Before", "After"],
+        ["Categorical palette", "Unverified; two pairs below the usual "
+         "distinguishability threshold", "Okabe-Ito, verified by simulation, "
+         "deltaE >= 20 everywhere"],
+        ["PASS/FAIL status colour", "Green/red (the classic confusion pair)",
+         "Teal/red, verified separately"],
+        ["Figure export", "PNG only, 130 DPI", "PNG at 300 DPI, plus vector PDF for the "
+         "IEEE paper (infinite-resolution lines and text)"],
+        ["IEEE paper file size", "1.2 MB (rasterised figures)", "578 KB (vector figures)"],
+        ["Training-curve scale", "CNN and ResNet1D rows auto-scaled independently",
+         "Shared y-axis — directly comparable"]]
+bottom = d.table(s, .6, 3.5, 12.1, rows, col_w=[2.3, 4.6, 5.2], size=9, row_h=.52)
+
+# ══════════════════════════════════════════════════════════════ 45. item 5 — framing decision (open)
+s = d.slide("Item 5 — OPEN", "The primary framing decision")
+d.text(s, .6, 2.15, 12.1, .5, [
+    "The current title and abstract give equal weight to two findings. Before the "
+    "abstract is finalized, one needs to lead:",
+], size=11.5, color=INK2, space_after=2)
+rows = [["", "Benchmark-methodology paper", "Personalization-results paper"],
+        ["Headline claim", "Evaluation-protocol leakage inflates apparent accuracy by "
+         "1.09x-2.28x, architecture-dependent", "Few-shot calibration recovers 20-51% of "
+         "diastolic error, but not systolic, and not under a chronological split"],
+        ["Personalization section becomes", "A secondary example of the same leakage "
+         "theme", "N/A — stays primary"],
+        ["Leakage-gap section becomes", "N/A — stays primary", "Supporting justification "
+         "for why this study's evaluation is more rigorous than prior work's"],
+        ["Natural audience", "Methodology / benchmarking readers", "Wearable-device / "
+         "applied-clinical readers"]]
+bottom = d.table(s, .6, 2.75, 12.1, rows, col_w=[2.3, 4.9, 4.9], size=9, row_h=.72)
+d.text(s, .6, bottom + .15, 12.1, .4, [
+    "This is an editorial call about emphasis, not a finding that needs more evidence — "
+    "both claims are already fully supported either way.",
+], size=10, color=MUTED, space_after=1)
+
 d.save_pdf(DOCS / "Final_Project_Report.pdf")

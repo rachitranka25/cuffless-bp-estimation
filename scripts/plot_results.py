@@ -79,13 +79,22 @@ def save(fig, name, model=None):
     plt.close(fig)
 
 
+#  CNN/ResNet1D's plain calfree run is the schedule-confounded checkpoint (see
+#  the OneCycleLR-confound analysis); the canonical calfree number used
+#  everywhere else for these two models is the schedule-fixed checkpoint
+#  instead. load() substitutes it in so every figure built from `runs` agrees
+#  with Table IV rather than silently using the superseded checkpoint.
+CALFREE_CANONICAL_TAG = {"cnn": "schedfix", "resnet": "schedfix"}
+
+
 def load():
     """{(model, protocol): run dict} for the untagged runs.
 
     Tagged runs (ablations such as `gb_calfree_nobalance`) share a model and a
     protocol with the run they are compared against, so they are kept out of the
     main dictionary — otherwise an ablation would silently replace the result it
-    exists to be measured against.
+    exists to be measured against. The exception is CALFREE_CANONICAL_TAG: for
+    those (model, protocol) pairs, the tagged run IS the canonical one.
     """
     runs = {}
     for p in sorted(MODEL_RESULTS.glob("*/*.json")):
@@ -94,9 +103,15 @@ def load():
         if "personalization" in p.name or "domain_shift" in p.name:
             continue
         d = json.loads(p.read_text())
-        if d.get("config", {}).get("tag"):
-            continue
-        runs[(d["model"], d["protocol"])] = d
+        tag = d.get("config", {}).get("tag")
+        key = (d["model"], d["protocol"])
+        if tag:
+            if tag != CALFREE_CANONICAL_TAG.get(d["model"]) or d["protocol"] != "calfree":
+                continue
+            # this IS the canonical calfree run for this model — falls through
+        elif key[0] in CALFREE_CANONICAL_TAG and key[1] == "calfree":
+            continue  # superseded by the schedule-fixed run above
+        runs[key] = d
     return runs
 
 
@@ -222,7 +237,8 @@ def _one_bp_band_error(model, protocol):
     is hypertensive or not as one person, and splitting diastolic on its own
     scale would put the same clip in different bands on the two rows.
     """
-    on = predictions(model, protocol)
+    on_tag = CALFREE_CANONICAL_TAG.get(model, "") if protocol == "calfree" else ""
+    on = predictions(model, protocol, tag=on_tag)
     off = predictions(model, protocol, tag="nobalance")
     if on is None or off is None:
         return
@@ -310,7 +326,8 @@ def fig_bland_altman(runs):
     """
     models, protos = _present(runs)
     for m in models:
-        cols = [p for p in protos if predictions(m, p) is not None]
+        tags = {p: (CALFREE_CANONICAL_TAG.get(m, "") if p == "calfree" else "") for p in protos}
+        cols = [p for p in protos if predictions(m, p, tag=tags[p]) is not None]
         if not cols:
             continue
         fig, axes = plt.subplots(2, len(cols), figsize=(3.5 * len(cols), 6.8),
@@ -319,7 +336,7 @@ def fig_bland_altman(runs):
             k = 0 if target == "sbp" else 1
             for col, p in enumerate(cols):
                 ax = axes[row][col]
-                y, yp, _ = predictions(m, p)
+                y, yp, _ = predictions(m, p, tag=tags[p])
                 mean = (y[:, k] + yp[:, k]) / 2
                 diff = yp[:, k] - y[:, k]
                 bias, sd = diff.mean(), diff.std(ddof=1)
@@ -519,7 +536,8 @@ def fig_domain_shift_control(runs):
     rows = []
     for m in _present(runs)[0]:
         d = MODEL_RESULTS / m
-        bal = d / f"{m}_dalia_domain_shift.json"
+        bal_tag = CALFREE_CANONICAL_TAG.get(m, "")
+        bal = d / f"{m}_{bal_tag + '_' if bal_tag else ''}dalia_domain_shift.json"
         nob = d / f"{m}_nobalance_dalia_domain_shift.json"
         if not (bal.exists() and nob.exists()):
             continue
@@ -686,9 +704,20 @@ def fig_training_curves(runs):
 def fig_personalization():
     # the primary (BP-bin balanced) curves only — the "_nobalance" ablation
     # files share the same model/source/pick labels and would otherwise
-    # double every legend entry with no visual way to tell them apart.
+    # double every legend entry with no visual way to tell them apart. For
+    # CNN/ResNet1D, the schedule-fixed file supersedes the plain one (see
+    # CALFREE_CANONICAL_TAG) — skip the plain file for those two so their
+    # curve isn't plotted twice.
+    def _superseded(f):
+        if "nobalance" in f.name:
+            return True
+        for m, tag in CALFREE_CANONICAL_TAG.items():
+            if f.name == f"{m}_personalization_calfree.json":
+                return True
+        return False
+
     files = sorted(f for f in MODEL_RESULTS.glob("*/*_personalization_*.json")
-                    if "nobalance" not in f.name)
+                    if not _superseded(f))
     if not files:
         return
     fig, axes = plt.subplots(1, 2, figsize=(13.2, 4.4))

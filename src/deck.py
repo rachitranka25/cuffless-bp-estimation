@@ -17,13 +17,17 @@ from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 
+# Colour-blind-safe set, matching src/viz.py exactly (Okabe & Ito 2008,
+# verified via scripts/check_palette_safety.py) — this deck used to carry its
+# own, unaudited copy of the project's palette that still had the old,
+# unsafe values after viz.py was fixed.
 INK = RGBColor(0x0B, 0x0B, 0x0B)
 INK2 = RGBColor(0x52, 0x51, 0x4E)
 MUTED = RGBColor(0x8A, 0x8A, 0x85)
-BLUE = RGBColor(0x2A, 0x78, 0xD6)
-ORANGE = RGBColor(0xEB, 0x68, 0x34)
-AQUA = RGBColor(0x1B, 0xAF, 0x7A)
-RED = RGBColor(0xE3, 0x49, 0x48)
+BLUE = RGBColor(0x00, 0x72, 0xB2)
+ORANGE = RGBColor(0xD5, 0x5E, 0x00)
+AQUA = RGBColor(0x56, 0xB4, 0xE9)
+RED = RGBColor(0xCC, 0x33, 0x11)
 BG = RGBColor(0xFC, 0xFC, 0xFB)
 LINE = RGBColor(0xE3, 0xE3, 0xDF)
 HEAD_BG = RGBColor(0xF2, 0xF5, 0xFA)

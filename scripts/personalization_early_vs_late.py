@@ -24,13 +24,25 @@ LABEL = {"rf": "Random Forest", "gb": "Gradient Boosting", "cnn": "1D-CNN",
          "resnet": "ResNet1D", "transformer": "Transformer"}
 SHOTS = (1, 3, 5, 10, 25)
 
+# CNN/ResNet1D's plain calfree checkpoint is the schedule-confounded one (see
+# the OneCycleLR-confound analysis); their canonical calfree result everywhere
+# else in this project is the schedule-fixed checkpoint instead. Without this,
+# this script would silently personalize from the wrong checkpoint for these
+# two models — caught by cross-checking k=0 MAE against Table IV.
+BASE_TAG = {"cnn": "schedfix", "resnet": "schedfix"}
+
+
+def _base_name(m):
+    tag = BASE_TAG.get(m, "")
+    return f"{m}_calfree_{tag}" if tag else f"{m}_calfree"
+
 segidx = np.load(PROC_PULSEDB / "calfree_test" / "segidx.npy")
 valid = ~np.isnan(segidx)
 
 
 def true_early_sweep(m):
     """DBP {mae, aami_pass} at each k in SHOTS, true-chronological split."""
-    d = np.load(model_dir(m) / f"{m}_calfree_predictions.npz")
+    d = np.load(model_dir(m) / f"{_base_name(m)}_predictions.npz")
     p_pool, y_pool, s_pool = d["y_pred"], d["y_true"], d["subjects"]
     out = {}
     for k in SHOTS:
@@ -57,7 +69,9 @@ def true_early_sweep(m):
 def original_sweep(m):
     """DBP {mae, aami_pass} at each k in SHOTS, from the saved same-time
     (storage-order first-k) personalization curve, pick='first'."""
-    p = model_dir(m) / f"{m}_personalization_calfree.json"
+    tag = BASE_TAG.get(m, "")
+    suffix = f"_{tag}" if tag else ""
+    p = model_dir(m) / f"{m}_personalization_calfree{suffix}.json"
     d = json.loads(p.read_text())
     curve = {row["shots"]: row["results"]["dbp"] for row in d["curves"]["first"]}
     return {k: dict(mae=curve[k]["mae"], aami_pass=curve[k]["aami_pass"],
@@ -69,8 +83,9 @@ print(f"{'model':14s} " + "".join(f"{'k=' + str(k):>16s}" for k in SHOTS))
 print(f"{'':14s} " + "".join(f"{'same / true-early':>16s}" for _ in SHOTS))
 print("-" * (14 + 16 * len(SHOTS)))
 for m in ORDER:
-    npz = model_dir(m) / f"{m}_calfree_predictions.npz"
-    pj = model_dir(m) / f"{m}_personalization_calfree.json"
+    npz = model_dir(m) / f"{_base_name(m)}_predictions.npz"
+    tag = BASE_TAG.get(m, "")
+    pj = model_dir(m) / f"{m}_personalization_calfree{'_' + tag if tag else ''}.json"
     if not npz.exists():
         print(f"{LABEL[m]:14s}  -- no calfree predictions yet, skipped --")
         continue

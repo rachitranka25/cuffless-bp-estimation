@@ -183,12 +183,12 @@ abstract_parts = [
      "calibration clips, scored on storage-order and chronological "
      "held-out clips."),
     ("Results.", "The calibration-free accuracy gap, relative to "
-     "same-patient testing, ranged from 1.09x (Transformer) to 2.28x "
+     "same-patient testing, ranged from 1.14x (Transformer) to 2.13x "
      "(ResNet1D), confirming architecture-dependence. BP-bin weighting "
      "recovered 4-18 mmHg in the rare, critical high-BP range, costing "
      "0.2-2.8 mmHg mean error depending on architecture. Twenty-five "
      "calibration clips cut diastolic MAE by a fifth to a half, within "
-     "0.3 mmHg of each model's physiological ceiling; systolic spread "
+     "roughly 0.2-0.6 mmHg of each model's physiological ceiling; systolic spread "
      "stayed above the AAMI threshold regardless, and under chronological "
      "calibration no model met that threshold at any size tested."),
     ("Conclusions.", "Evaluation-protocol choice changes cuffless-BP "
@@ -231,7 +231,11 @@ para(doc, "Hypertension affects an estimated 1.3 billion adults worldwide, "
           "smartwatches — would let an older adult track BP trends during "
           "ordinary daily activity, without the burden of a cuff, addressing "
           "a documented gap between measurement frequency and the clinical "
-          "value of trend awareness in this population.")
+          "value of trend awareness in this population. Systematic review "
+          "evidence confirms both the clinical promise of such devices and "
+          "the accuracy and standardization gaps still unresolved before "
+          "widespread clinical adoption (Islam et al., 2022; Henry et al., "
+          "2024).")
 
 para(doc, "The physiological basis for this approach is well established: "
           "the time it takes a pressure pulse to travel between two arterial "
@@ -239,11 +243,15 @@ para(doc, "The physiological basis for this approach is well established: "
           "and, through it, to BP (Mukkamala et al., 2015), and a PPG "
           "waveform's morphology — not only its timing relative to a "
           "second sensor — carries additional information correlated with "
-          "BP (Elgendi et al., 2019). Translating this relationship into an "
+          "BP (Elgendi et al., 2019), on top of an already mature practice "
+          "of screening PPG signal quality before any downstream estimation "
+          "(Elgendi, 2016). Translating this relationship into an "
           "accurate estimator has become predominantly a machine-learning "
           "problem over the past decade, with reported architectures "
           "spanning classical regression on hand-crafted pulse-wave "
-          "features, convolutional networks operating on the raw waveform, "
+          "features (Kachuee et al., 2017), convolutional and residual "
+          "networks on the raw waveform (Slapničar et al., 2019), "
+          "attention-augmented recurrent hybrids (El-Hajj & Kyriacou, 2021), "
           "U-Net-style encoder-decoders, and most recently transformers "
           "conditioned on patient demographics (Arjomand et al., 2024; Chen "
           "et al., 2024; Huang et al., 2024; Shen et al., 2026). Reported "
@@ -331,7 +339,12 @@ para(doc, "A second, related methodological question concerns "
           "partly reflect short-term signal continuity (the same "
           "within-session physiological state or sensor-contact condition) "
           "rather than a stable per-patient calibration that would survive "
-          "to a later use of the device. This concern echoes a "
+          "to a later use of the device. Transfer learning and "
+          "calibration-based adaptation are an established strategy for "
+          "cross-subject generalization in biosignal estimation more "
+          "broadly (Jafari et al., 2025), but whether a calibration set's "
+          "temporal proximity to the evaluation set inflates its apparent "
+          "benefit is rarely checked. This concern echoes a "
           "session-leakage finding independently reported for PPG-based BP "
           "evaluation by Tae et al. (2026), using a change-point-aware "
           "buffered evaluation protocol on a different dataset; the present "
@@ -398,14 +411,17 @@ caption(doc, "Figure 1", "Study design: the four evaluation protocols "
              "unseen ones.")
 
 h2(doc, "Models")
-para(doc, "Five architectures were compared. Random Forest and Gradient "
-          "Boosting were trained on 61 hand-crafted morphological and "
+para(doc, "Five architectures were compared. Random Forest (Breiman, 2001) "
+          "and Gradient Boosting (Friedman, 2001) were trained on 61 "
+          "hand-crafted morphological and "
           "demographic features per clip (300 trees / 500 boosting rounds "
           "respectively). 1D-CNN (five convolutional blocks, 381,186 "
           "parameters) and ResNet1D (eight residual blocks across four "
-          "stages, ResNet-18 style, 2.19M parameters) operated on the raw "
+          "stages, ResNet-18 style (He et al., 2016), 2.19M parameters) "
+          "operated on the raw "
           "two-channel (ECG + PPG) waveform. The Transformer (1.41M "
           "parameters) followed the patch-10 self-attention architecture "
+          "(Vaswani et al., 2017) "
           "with demographic FiLM conditioning and a morphology-classification "
           "auxiliary head reported by Shen et al. (2026), reproduced as "
           "closely as the published description allows: PPG-only input, "
@@ -505,15 +521,15 @@ h2(doc, "The calibration-free gap is large and architecture-dependent")
 para(doc, "Table 2 reports MAE for every model under every protocol. Relative "
           "to the average of leaky and calibration-based performance (both "
           "of which test on previously seen patients), calibration-free "
-          "accuracy was 1.09 to 2.28 times worse, depending on architecture "
-          "(Figure 2). The Transformer showed the smallest gap (1.09x: "
-          "14.13 mmHg seen-patient average versus 15.44 mmHg calibration-"
+          "accuracy was 1.14 to 2.13 times worse, depending on architecture "
+          "(Figure 2). The Transformer showed the smallest gap (1.14x: "
+          "13.90 mmHg seen-patient average versus 15.81 mmHg calibration-"
           "free), not because it is uniformly the most accurate architecture "
           "— it is in fact the worst of the five on the calibration-based "
-          "protocol specifically (13.80 mmHg) — but because it does not "
+          "protocol specifically (13.90 mmHg) — but because it does not "
           "benefit from already-seen patients to the same degree the other "
-          "four architectures do. ResNet1D showed the largest gap (2.28x: "
-          "6.12 mmHg seen-patient average versus 13.96 mmHg calibration-"
+          "four architectures do. ResNet1D showed the largest gap (2.13x: "
+          "6.56 mmHg seen-patient average versus 13.94 mmHg calibration-"
           "free), the sharpest instance of a pattern visible to a lesser "
           "degree in Random Forest and Gradient Boosting: strong apparent "
           "accuracy on seen patients that does not transfer to new ones. "
@@ -525,15 +541,15 @@ para(doc, "Table 2 reports MAE for every model under every protocol. Relative "
           "patient-level cluster bootstrap (2,000 resamples of the test-set "
           "patients, computed from each model's saved per-clip predictions "
           "rather than by retraining) gives a 95% confidence interval on "
-          "ResNet1D's gap minus the Transformer's gap of [+1.05x, +1.34x] "
-          "for SBP and [+1.13x, +1.42x] for DBP; both exclude zero, so the "
+          "ResNet1D's gap minus the Transformer's gap of [+0.86x, +1.12x] "
+          "for SBP and [+0.90x, +1.22x] for DBP; both exclude zero, so the "
           "difference between the architecture with the largest gap and the "
           "one with the smallest is significant at the 5% level under this "
           "resampling scheme, not only descriptively stable across seeds. "
           "The same bootstrap gives a second, independent 95% interval on "
           "every model's calibration-free MAE (e.g. Random Forest: "
-          "12.76 mmHg SBP, [11.86, 13.76]; ResNet1D: 13.96 mmHg, "
-          "[12.96, 15.07]) that matches each point estimate in Table 2 "
+          "12.77 mmHg SBP, [11.88, 13.77]; ResNet1D: 13.94 mmHg, "
+          "[12.93, 15.03]) that matches each point estimate in Table 2 "
           "exactly, since it captures test-set sampling uncertainty rather "
           "than the training-seed variance the intervals above already "
           "cover.")
@@ -577,8 +593,8 @@ t6_rows = [
     ["Model", "SBP r", "SBP AAMI", "SBP BHS", "DBP r", "DBP AAMI", "DBP BHS"],
     ["Random Forest", "0.518", "FAIL", "D", "0.468", "FAIL", "D"],
     ["Gradient Boosting", "0.497", "FAIL", "D", "0.454", "FAIL", "D"],
-    ["1D-CNN", "0.546", "FAIL", "D", "0.479", "FAIL", "D"],
-    ["ResNet1D", "0.525", "FAIL", "D", "0.473", "FAIL", "D"],
+    ["1D-CNN", "0.534", "FAIL", "D", "0.478", "FAIL", "D"],
+    ["ResNet1D", "0.539", "FAIL", "D", "0.488", "FAIL", "D"],
     ["Transformer", "0.530", "FAIL", "D", "0.570", "FAIL", "D"],
 ]
 make_table(doc, t6_rows, col_widths_mm=[26, 14, 14, 14, 14, 14, 14])
@@ -591,7 +607,7 @@ para(doc, "BP-bin weighting's effect was architecture-specific rather than "
           "while recovering 4.05 mmHg of error in the above-170-mmHg band; "
           "it cost the Transformer the most overall (+2.77 mmHg) while "
           "recovering the second-most in that same high-BP band (16.41 "
-          "mmHg, behind only the CNN's 17.52 mmHg). Below 130 mmHg systolic "
+          "mmHg, behind only the CNN's 16.73 mmHg). Below 130 mmHg systolic "
           "(72% of test clips), the unweighted model was frequently equal "
           "or better; above 150 mmHg, weighting's benefit was consistent "
           "and clinically meaningful across every architecture tested. No "
@@ -624,7 +640,7 @@ para(doc, "Figure 4 compares this study's calibration-free, unweighted "
           "architecture-dependence finding above, the gap between four "
           "years of published architecture progress on this benchmark — "
           "roughly 12.17 to 13.67 mmHg across the four prior studies "
-          "compared here — is smaller than the 1.09x-2.28x gap this study "
+          "compared here — is smaller than the 1.14x-2.13x gap this study "
           "measures from evaluation protocol alone on a single model "
           "architecture. This is evidence about this benchmark specifically, "
           "not a general claim about the field, since it reflects four "
@@ -639,7 +655,8 @@ h2(doc, "An unseen-patient test set does not guarantee AAMI-compliant sampling")
 para(doc, "Because nearly every calibration-free AAMI pass/fail claim in "
           "this and comparable studies is computed on the calibration-free "
           "test split, whether that split itself satisfies AAMI/ISO "
-          "81060-2's own sampling requirement for reference-BP coverage was "
+          "81060-2's (International Organization for Standardization, 2018) "
+          "own sampling requirement for reference-BP coverage was "
           "checked directly (Table 4). It does not: the calibration-free "
           "split fails the standard's requirement on three of its four "
           "BP-range criteria for both SBP and DBP (for example, only 1.5% "
@@ -670,21 +687,25 @@ h2(doc, "An external, label-free wearable check")
 add_figure(doc, FIG_SHIFT, width_mm=150)
 caption(doc, "Figure 5", "Predicted SBP shift from PulseDB to PPG-DaLiA, "
              "weighted versus unweighted training, all five models.")
-para(doc, "On PPG-DaLiA, every model's mean predicted SBP across the 15 "
+para(doc, "Models trained on hospital-recorded PPG are routinely reported "
+          "to degrade under exactly this kind of cross-population, "
+          "cross-device shift (Abdalazim et al., 2025); PPG-DaLiA provides "
+          "a direct, if label-free, test of that degradation for this "
+          "study's own models. On PPG-DaLiA, every model's mean predicted SBP across the 15 "
           "volunteers exceeded the healthy-adult norm, and models still "
-          "separated individuals by 2.1-9.6 mmHg (true between-subject "
+          "separated individuals by 2.5-6.8 mmHg (true between-subject "
           "spread: 11.8 mmHg), indicating the shift onto this external "
           "device-and-population combination does not collapse all subjects "
           "to a single value (Figure 5). The fraction of the apparent shift "
           "attributable to BP-bin weighting itself (rather than to the new "
           "device/population) ranged from 2% (Transformer) to 40% (Gradient "
-          "Boosting) across four of the five models; ResNet1D was a "
-          "reversed outlier, where weighting reduced rather than enlarged "
-          "the apparent shift. Heart-rate MAE, the only metric on this "
+          "Boosting) across all five models. Heart-rate MAE, the only metric on this "
           "dataset with ground truth, was 13.06 bpm in low-motion activity "
           "segments (sitting, lunch, working, driving) and 33.35 bpm in "
           "high-motion segments (cycling, stairs, walking, table soccer, "
-          "transient) using this study's generic pulse detector, against "
+          "transient) — consistent with the well-established sensitivity "
+          "of wrist PPG to motion artifact during exercise-like activity "
+          "(Zhang et al., 2015) — using this study's generic pulse detector, against "
           "8.69 bpm reported by Reiss et al. (2019) using a dedicated "
           "denoiser on the same data — a reminder that the BP numbers above "
           "likely carry additional, unmeasured error from signal-processing "
@@ -698,9 +719,10 @@ para(doc, "A second, independent label-free check is the fraction of each "
           "is low for every architecture (at most 192 of 64,682 clips). It "
           "is nonetheless strongly architecture-dependent: Random Forest "
           "and Gradient Boosting produce an implausible prediction roughly "
-          "8-9 times as often as the 1D-CNN and roughly 35-65 times as "
-          "often as ResNet1D and the Transformer, which produce at most 5 "
-          "and 3 implausible clips respectively out of 64,682. This is a "
+          "8 times as often as ResNet1D and roughly 55-60 times as "
+          "often as the Transformer, which produces at most 3 "
+          "implausible clips out of 64,682; the 1D-CNN produces none in "
+          "this set. This is a "
           "plausibility check rather than an accuracy check — it does not "
           "require true labels and cannot confirm a prediction is correct, "
           "only flag predictions that are certainly wrong — and, though "
@@ -717,8 +739,8 @@ t_plausible_rows = [
     ["Model", "SBP out of range", "DBP out of range", "Any"],
     ["Random Forest", "0.000%", "0.272%", "0.272%"],
     ["Gradient Boosting", "0.138%", "0.257%", "0.297%"],
-    ["1D-CNN", "0.020%", "0.022%", "0.034%"],
-    ["ResNet1D", "0.000%", "0.008%", "0.008%"],
+    ["1D-CNN", "0.000%", "0.000%", "0.000%"],
+    ["ResNet1D", "0.012%", "0.025%", "0.036%"],
     ["Transformer", "0.003%", "0.005%", "0.005%"],
 ]
 make_table(doc, t_plausible_rows, col_widths_mm=[40, 35, 35, 25])
@@ -730,13 +752,13 @@ para(doc, "Table 7 and Figure 6 report personalization results. Under the "
           "diastolic MAE by 20-51% across the five models (e.g. Random "
           "Forest: 8.38 to 4.81 mmHg), and every model passed AAMI's "
           "diastolic criterion from roughly five calibration clips onward. "
-          "This recovery came within 0.3 mmHg of each architecture's "
+          "This recovery came within roughly 0.2-0.6 mmHg of each architecture's "
           "physiological ceiling (Table 6) — the best possible constant "
           "per-subject offset, computed directly from each subject's true "
           "held-out labels and therefore unreachable in real deployment, "
           "but useful to show the remaining room (e.g. 1D-CNN: raw SBP MAE "
-          "15.32 mmHg, oracle ceiling 9.03 mmHg, realised 25-clip result "
-          "7.74 mmHg). Across all five models, 33-41% of raw SBP error and "
+          "14.89 mmHg, oracle ceiling 8.87 mmHg, realised 25-clip result "
+          "7.88 mmHg). Across all five models, 33-40% of raw SBP error and "
           "40-46% of raw DBP error was this kind of fixable, constant "
           "per-subject offset; the remainder reflects within-subject BP "
           "variability that a constant correction cannot track, since "
@@ -750,8 +772,8 @@ t5_rows = [
     ["Model", "SBP raw->oracle", "SBP recov.", "DBP raw->oracle", "DBP recov."],
     ["Random Forest", "12.76->8.48", "33%", "8.38->4.98", "41%"],
     ["Gradient Boosting", "14.63->8.77", "40%", "9.00->5.15", "43%"],
-    ["1D-CNN", "15.32->9.03", "41%", "9.20->5.00", "46%"],
-    ["ResNet1D", "13.96->9.01", "35%", "9.03->5.46", "40%"],
+    ["1D-CNN", "14.89->8.87", "40%", "9.04->4.90", "46%"],
+    ["ResNet1D", "13.94->9.13", "35%", "8.94->5.40", "40%"],
     ["Transformer", "15.44->9.34", "39%", "8.47->4.94", "42%"],
 ]
 make_table(doc, t5_rows, col_widths_mm=[28, 26, 16, 26, 16])
@@ -780,8 +802,8 @@ t3_rows = [
     ["Model", "k=0", "k=25 naive", "AAMI (naive)", "k=25 chron.", "AAMI (chron.)"],
     ["Random Forest", "8.38", "4.81", "PASS", "7.32", "FAIL"],
     ["Gradient Boosting", "9.00", "4.74", "PASS", "7.11", "FAIL"],
-    ["1D-CNN", "9.20", "4.51", "PASS", "7.25", "FAIL"],
-    ["ResNet1D", "9.03", "4.83", "PASS", "7.38", "FAIL"],
+    ["1D-CNN", "9.04", "4.55", "PASS", "7.15", "FAIL"],
+    ["ResNet1D", "8.94", "4.77", "PASS", "7.31", "FAIL"],
     ["Transformer", "8.47", "4.40", "PASS", "6.68", "FAIL"],
 ]
 make_table(doc, t3_rows, col_widths_mm=[28, 14, 18, 18, 18, 18])
@@ -799,8 +821,8 @@ t_chron_rows = [
     ["Model", "k=1", "k=3", "k=5", "k=10", "k=25"],
     ["Random Forest", "9.58/12.74", "11.97/18.96", "9.46/12.68", "8.65/11.86", "7.32/9.68"],
     ["Gradient Boosting", "9.11/11.84", "13.11/27.74", "9.23/12.32", "7.95/10.53", "7.11/9.47"],
-    ["1D-CNN", "10.11/13.30", "11.51/17.35", "9.39/12.89", "8.20/10.99", "7.25/9.75"],
-    ["ResNet1D", "10.54/13.59", "11.10/15.61", "9.41/12.68", "8.44/11.17", "7.38/9.47"],
+    ["1D-CNN", "9.79/12.73", "11.37/16.85", "9.03/11.93", "8.02/10.67", "7.15/9.44"],
+    ["ResNet1D", "10.45/13.36", "10.56/16.28", "9.23/12.82", "7.98/10.51", "7.31/9.54"],
     ["Transformer", "9.60/12.59", "10.38/14.81", "8.38/11.23", "7.60/10.08", "6.68/8.75"],
 ]
 make_table(doc, t_chron_rows, col_widths_mm=[30, 24, 24, 24, 24, 24])
@@ -809,8 +831,8 @@ doc.add_paragraph()
 add_figure(doc, FIG_PERS, width_mm=150)
 caption(doc, "Figure 6", "Error reduction as a function of calibration-clip "
              "count (k = 0-25), all five models. Most recoverable error is "
-             "gone by k=5; two models show a brief worsening at k=3, "
-             "indicating 2-3 clips is too few to fit a stable correction.")
+             "gone by k=5; Random Forest shows a brief worsening at k=3, "
+             "indicating 2-3 clips is occasionally too few to fit a stable correction.")
 
 # --------------------------------------------------------------------------- #
 h1(doc, "Discussion")
@@ -818,7 +840,7 @@ h1(doc, "Discussion")
 para(doc, "This study's central finding is that evaluation-protocol choice "
           "is not a minor methodological detail for cuffless BP estimation: "
           "on a single benchmark, moving from same-patient to unseen-patient "
-          "testing changed apparent accuracy by 1.09x to 2.28x depending on "
+          "testing changed apparent accuracy by 1.14x to 2.13x depending on "
           "architecture, a larger effect than the gap separating the best "
           "and weakest architecture-progress results compared against in "
           "this study. Because this effect is architecture-dependent, a "
@@ -953,7 +975,7 @@ para(doc, "Finally, the session-leakage concern this study raises for "
 h1(doc, "Conclusion")
 para(doc, "Across five architectures spanning classical ensembles to a "
           "demographic-conditioned transformer, evaluation-protocol leakage "
-          "inflated apparent cuffless-BP accuracy by 1.09x to 2.28x, an "
+          "inflated apparent cuffless-BP accuracy by 1.14x to 2.13x, an "
           "effect that is architecture-dependent and, on this benchmark, "
           "larger than several years of reported architecture progress. "
           "Twenty-five real calibration clips recovered most of the "
@@ -967,7 +989,10 @@ para(doc, "Across five architectures spanning classical ensembles to a "
           "test split used for AAMI compliance claims meets the standard's "
           "own sampling requirements, and test personalization gains under "
           "evaluation conditions separated in time from calibration, not "
-          "only in clip identity. For the gerontechnology use case that "
+          "only in clip identity — calibration standardization and "
+          "validation-protocol clarity are already recognized as the main "
+          "barriers between research-stage cuffless BP models and clinical "
+          "translation (Henry et al., 2024). For the gerontechnology use case that "
           "motivates this work — unobtrusive, continuous BP awareness "
           "supporting independent aging in place (Olmedo-Aguirre et al., "
           "2022) — these distinctions are not academic: a device whose "
@@ -996,22 +1021,37 @@ para(doc, "PulseDB is available from the original authors "
           "(scripts/test_subject_disjointness.py) that independently "
           "verifies every protocol's train/test subject-overlap guarantee "
           "in seconds, so the leakage-control claims this study makes can "
-          "be checked without retraining any model.")
+          "be checked without retraining any model. Figure colors "
+          "throughout this manuscript follow a categorical palette chosen "
+          "for color-vision-deficiency safety (Okabe & Ito, 2008), verified "
+          "by simulation rather than assumed.")
 
 # --------------------------------------------------------------------------- #
 h1(doc, "References")
 
 refs = [
+    "Abdalazim, N., Alchieri, L., Alecci, L., Barbiero, P., & Santini, S. "
+    "(2025). The impact of domain shift on predicting perceived sleep "
+    "quality from wearables. Sensors, 25(13), 4012. "
+    "https://doi.org/10.3390/s25134012",
+
     "Arjomand, A., Boudesh, A., Bayatmakou, F., Kent, K. B., & Mohammadi, A. "
     "(2024). TransfoRhythm: A transformer architecture conductive to blood "
     "pressure estimation via solo PPG signal capturing (arXiv:2404.15352). "
     "arXiv. https://arxiv.org/abs/2404.15352",
+
+    "Breiman, L. (2001). Random forests. Machine Learning, 45, 5-32. "
+    "https://doi.org/10.1023/A:1010933404324",
 
     "Chen, J., Zhou, X., Feng, L., Ling, B. W.-K., Han, L., & Zhang, H. "
     "(2024). rU-Net, multi-scale feature fusion and transfer learning: "
     "Unlocking the potential of cuffless blood pressure monitoring with "
     "PPG and ECG. IEEE Journal of Biomedical and Health Informatics. "
     "https://doi.org/10.1109/JBHI.2024.3483301",
+
+    "Elgendi, M. (2016). Optimal signal quality index for photoplethysmogram "
+    "signals. Bioengineering, 3(4), 21. "
+    "https://doi.org/10.3390/bioengineering3040021",
 
     "Elgendi, M., Fletcher, R., Liang, Y., Howard, N., Lovell, N. H., "
     "Abbott, D., Lim, K., & Ward, R. (2019). The use of photoplethysmography "
@@ -1024,10 +1064,50 @@ refs = [
     "Communications Medicine, 4, 134. "
     "https://doi.org/10.1038/s43856-024-00555-2",
 
+    "El-Hajj, C., & Kyriacou, P. A. (2021). Deep learning models for "
+    "cuffless blood pressure monitoring from PPG signals using attention "
+    "mechanism. Biomedical Signal Processing and Control, 65, 102301. "
+    "https://doi.org/10.1016/j.bspc.2020.102301",
+
+    "Friedman, J. H. (2001). Greedy function approximation: A gradient "
+    "boosting machine. Annals of Statistics, 29(5), 1189-1232. "
+    "https://doi.org/10.1214/aos/1013203451",
+
+    "He, K., Zhang, X., Ren, S., & Sun, J. (2016). Deep residual learning "
+    "for image recognition. In Proceedings of the IEEE Conference on "
+    "Computer Vision and Pattern Recognition (CVPR) (pp. 770-778).",
+
+    "Henry, B., Merz, M., Hoang, H., Abdulkarim, G., Wosik, J., & "
+    "Schoettker, P. (2024). Cuffless blood pressure in clinical practice: "
+    "Challenges, opportunities and current limits. Blood Pressure, 33(1), "
+    "2304190. https://doi.org/10.1080/08037051.2024.2304190",
+
     "Huang, Y., He, Y., Song, Z., Gao, K., & Zheng, Y. (2024). Validation "
     "of deep learning models for cuffless blood pressure estimation on a "
     "large benchmarking dataset. Connected Health and Telemedicine, 3(1), "
     "300002. https://doi.org/10.20517/chatmed.2023.23",
+
+    "International Organization for Standardization. (2018). ISO "
+    "81060-2:2018 — Non-invasive sphygmomanometers — Part 2: Clinical "
+    "investigation of intermittent automated measurement type (with Amd "
+    "1:2020, Amd 2:2024).",
+
+    "Islam, S. M. S., Chow, C. K., Daryabeygikhotbehsara, R., Subedi, N., "
+    "Rawstorn, J., Tegegne, T., Karmakar, C., Siddiqui, M. U., Lambert, G., "
+    "& Maddison, R. (2022). Wearable cuffless blood pressure monitoring "
+    "devices: A systematic review and meta-analysis. European Heart "
+    "Journal - Digital Health, 3(2), 323-337. "
+    "https://doi.org/10.1093/ehjdh/ztac021",
+
+    "Jafari, M., Tao, X., Barua, P. D., Tan, R.-S., & Acharya, U. R. "
+    "(2025). Application of transfer learning for biomedical signals: A "
+    "comprehensive review of the last decade (2014-2024). Information "
+    "Fusion, 118, 102982. https://doi.org/10.1016/j.inffus.2025.102982",
+
+    "Kachuee, M., Kiani, M. M., Mohammadzade, H., & Shabany, M. (2017). "
+    "Cuffless blood pressure estimation algorithms for continuous "
+    "health-care monitoring. IEEE Transactions on Biomedical Engineering, "
+    "64(4), 859-869. https://doi.org/10.1109/TBME.2016.2580904",
 
     "Kapoor, S., & Narayanan, A. (2023). Leakage and the reproducibility "
     "crisis in machine-learning-based science. Patterns, 4(9), 100804. "
@@ -1052,6 +1132,11 @@ refs = [
     "Hypertension, 8(7), 607-619. "
     "https://doi.org/10.1097/00004872-199007000-00004",
 
+    "Okabe, M., & Ito, K. (2008). Color universal design (CUD): How to "
+    "make figures and presentations that are friendly to colorblind "
+    "people. Color Universal Design Organization. "
+    "https://jfly.uni-koeln.de/color/",
+
     "Oliveros, E., Patel, H., Kyung, S., Fugar, S., Goldberg, A., Madan, "
     "N., & Williams, K. A. (2020). Hypertension in older adults: "
     "Assessment, management, and challenges. Clinical Cardiology, 43(2), "
@@ -1071,6 +1156,11 @@ refs = [
     "transformer for cuffless blood pressure estimation from PPG signals "
     "(arXiv:2606.11125). arXiv. https://arxiv.org/abs/2606.11125",
 
+    "Slapničar, G., Mlakar, N., & Luštrek, M. (2019). Blood pressure "
+    "estimation from photoplethysmogram using a spectro-temporal deep "
+    "neural network. Sensors, 19(15), 3420. "
+    "https://doi.org/10.3390/s19153420",
+
     "Stergiou, G. S., Alpert, B., Mieke, S., Asmar, R., Atkins, N., "
     "Eckert, S., Frick, G., Friedman, B., Graßl, T., Ichikawa, T., "
     "Ioannidis, J. P., Lacy, P., McManus, R., Murray, A., Myers, M., "
@@ -1084,6 +1174,11 @@ refs = [
     "estimation (arXiv:2608.18639). arXiv. "
     "https://arxiv.org/abs/2608.18639",
 
+    "Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., "
+    "Gomez, A. N., Kaiser, Ł., & Polosukhin, I. (2017). Attention is all "
+    "you need. Advances in Neural Information Processing Systems "
+    "(NeurIPS), 30.",
+
     "Wang, W., Mohseni, P., Kilgore, K. L., & Najafizadeh, L. (2022). "
     "PulseDB: A large, cleaned dataset based on MIMIC-III and VitalDB for "
     "benchmarking cuff-less blood pressure estimation methods. Frontiers "
@@ -1096,6 +1191,11 @@ refs = [
 
     "World Health Organization. (2025). Ageing and health. "
     "https://www.who.int/news-room/fact-sheets/detail/ageing-and-health",
+
+    "Zhang, Z., Pi, Z., & Liu, B. (2015). TROIKA: A general framework for "
+    "heart rate monitoring using wrist-type photoplethysmographic signals "
+    "during intensive physical exercise. IEEE Transactions on Biomedical "
+    "Engineering, 62(2), 522-531. https://doi.org/10.1109/TBME.2014.2359372",
 ]
 for r in refs:
     p = doc.add_paragraph()
