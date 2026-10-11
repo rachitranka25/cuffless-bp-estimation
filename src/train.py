@@ -794,7 +794,8 @@ def offset_headroom(y_true, y_pred, subjects):
 
 
 def personalize(model="gb", source="calfree", shots=(0, 1, 3, 5, 10, 25),
-                picks=("first", "random", "spread"), seed=0, balance=True, save=True, **kw):
+                picks=("first", "random", "spread"), seed=0, balance=True, save=True,
+                base_tag="", **kw):
     """How much of the calibration-free error a few labelled clips recover.
 
     Spec section L: "for a held-out subject, use only the first small % of that
@@ -821,12 +822,20 @@ def personalize(model="gb", source="calfree", shots=(0, 1, 3, 5, 10, 25),
 
     k=0 is the uncorrected number, so the curve starts at the honest baseline
     and any drop is readable straight off it.
+
+    base_tag selects which saved calfree predictions file personalization
+    starts from — "" (default) is the plain run. CNN/ResNet1D's plain calfree
+    run is the schedule-confounded checkpoint (see Section on the OneCycleLR
+    confound); pass base_tag="schedfix" for those two models to personalize
+    from the schedule-fixed checkpoint instead, matching the canonical number
+    used everywhere else calfree is reported for them. The output file is
+    tagged to match, so this never overwrites the base_tag="" result.
     """
     if source not in ("calfree", "aami"):
         raise ValueError("source must be 'calfree' or 'aami'")
     protocol = "calfree" if source == "calfree" else "aami"
     cfg = Config(model=model, protocol=protocol, seed=seed, **kw)
-    print(f"\n=== personalize: {cfg.model}, source={source} ===")
+    print(f"\n=== personalize: {cfg.model}, source={source}, base_tag={base_tag!r} ===")
 
     if source == "calfree":
         # `run(model, protocol="calfree")` already scored every clip in this
@@ -835,7 +844,8 @@ def personalize(model="gb", source="calfree", shots=(0, 1, 3, 5, 10, 25),
         # saved test-split predictions are all this needs. CPU, no GPU, and it
         # takes seconds instead of the hours a re-fit would cost.
         nb = "" if balance else "_nobalance"
-        npz_path = model_dir(cfg.model) / f"{cfg.model}_calfree{nb}_predictions.npz"
+        base = f"_{base_tag}" if base_tag else ""
+        npz_path = model_dir(cfg.model) / f"{cfg.model}_calfree{base}{nb}_predictions.npz"
         if npz_path.exists():
             d = np.load(npz_path)
             p_pool, y_pool, s_pool = d["y_pred"], d["y_true"], d["subjects"]
@@ -898,11 +908,12 @@ def personalize(model="gb", source="calfree", shots=(0, 1, 3, 5, 10, 25),
                n_pool_clips=int(len(s_pool)), curves=curves)
     if save:
         nb_suffix = "" if balance else "_nobalance"
+        base_suffix = f"_{base_tag}" if base_tag else ""
         path = (model_dir(cfg.model)
-                / f"{cfg.model}_personalization_{source}{nb_suffix}.json")
+                / f"{cfg.model}_personalization_{source}{base_suffix}{nb_suffix}.json")
         path.write_text(json.dumps(out, indent=2, default=float))
         print(f"  wrote {path}")
-        _archive_run(f"{cfg.model}_personalization_{source}{nb_suffix}", path)
+        _archive_run(f"{cfg.model}_personalization_{source}{base_suffix}{nb_suffix}", path)
     return out
 
 

@@ -79,8 +79,8 @@ print("saved", OUT)
 OUT2 = ROOT / "results" / "overview" / "paper_weighting_all_models.png"
 
 models = ["Random Forest", "Gradient\nBoosting", "1D-CNN", "ResNet1D", "Transformer"]
-overall = [-0.18, 1.92, 2.30, 0.76, 2.77]
-above170 = [-4.05, -13.29, -17.52, -6.68, -16.41]
+overall = [-0.18, 1.92, 1.88, 0.74, 2.77]
+above170 = [-4.05, -13.29, -16.73, -9.06, -16.41]
 colors = [viz.BLUE, viz.YELLOW, viz.ORANGE, viz.AQUA, viz.VIOLET]
 
 fig2, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4))
@@ -124,9 +124,15 @@ MODEL_LABEL = {"rf": "Random Forest", "gb": "Gradient Boosting", "cnn": "1D-CNN"
                "resnet": "ResNet1D", "transformer": "Transformer"}
 PROTO_ORDER = ["leaky", "calbased", "calfree", "aami"]
 
+# CNN/ResNet1D's plain calfree checkpoint is schedule-confounded; their
+# canonical calfree result everywhere else is the schedule-fixed checkpoint.
+CALFREE_CANONICAL_TAG = {"cnn": "schedfix", "resnet": "schedfix"}
+
 
 def _predictions(model, protocol):
-    p = MODEL_RESULTS / model / f"{model}_{protocol}_predictions.npz"
+    tag = CALFREE_CANONICAL_TAG.get(model, "") if protocol == "calfree" else ""
+    suffix = f"_{tag}" if tag else ""
+    p = MODEL_RESULTS / model / f"{model}_{protocol}{suffix}_predictions.npz"
     if not p.exists():
         return None
     z = np.load(p, allow_pickle=True)
