@@ -77,15 +77,16 @@ def bars(ax, data, col, title, sub, xlabel):
               for m in mine]
     ax.barh(y, vals, color=colors, height=.62)
     for yy, v, m in zip(y, vals, mine):
-        ax.text(v + max(vals) * .015, yy, f"{v:.2f}", va="center", fontsize=9,
+        ax.text(v + max(vals) * .015, yy, f"{v:.2f}", va="center", fontsize=10.5,
                 color=viz.INK if m else viz.INK_2,
                 weight="bold" if m else "normal")
     ax.set_yticks(y, labels)
+    ax.tick_params(axis="both", labelsize=10.5)
     for tick, m in zip(ax.get_yticklabels(), mine):
         if m:
             tick.set_fontweight("bold")
             tick.set_color(viz.INK)
-    ax.set_xlabel(xlabel)
+    ax.set_xlabel(xlabel, fontsize=11)
     ax.set_xlim(0, max(vals) * 1.18)
     ax.grid(axis="y", visible=False)
     viz.despine(ax)
@@ -94,7 +95,7 @@ def bars(ax, data, col, title, sub, xlabel):
 
 def fig_calfree():
     d = rows("cal_free")
-    fig, axes = plt.subplots(1, 2, figsize=(13.5, 4.2))
+    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.0))
     bars(axes[0], d, 1, "Systolic BP — calibration-free",
          "subject-independent: no test patient was seen in training",
          "mean absolute error (mmHg)")

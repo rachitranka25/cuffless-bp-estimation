@@ -64,8 +64,6 @@ for ax, (key, title, color, train_lbl, test_lbl, overlap) in zip(axes, rows):
                 color=viz.BAD, weight="bold", style="italic", zorder=5,
                 bbox=dict(facecolor=viz.SURFACE, edgecolor="none", pad=2))
 
-fig.suptitle("The four evaluation protocols differ only in which patients and "
-             "clips are assigned to the test set", fontsize=11.5, weight="bold", y=1.04)
 plt.tight_layout()
 fig.savefig(OUT, bbox_inches="tight")
 fig.savefig(OUT.with_suffix(".pdf"), bbox_inches="tight")
@@ -78,33 +76,37 @@ print("saved", OUT)
 # --------------------------------------------------------------------------- #
 OUT2 = ROOT / "results" / "overview" / "paper_weighting_all_models.png"
 
-models = ["Random Forest", "Gradient\nBoosting", "1D-CNN", "ResNet1D", "Transformer"]
+models = ["Random\nForest", "Gradient\nBoosting", "1D-CNN", "ResNet1D", "Transformer"]
 overall = [-0.18, 1.92, 1.88, 0.74, 2.77]
 above170 = [-4.05, -13.29, -16.73, -9.06, -16.41]
 colors = [viz.BLUE, viz.YELLOW, viz.ORANGE, viz.AQUA, viz.VIOLET]
 
-fig2, (axL, axR) = plt.subplots(1, 2, figsize=(11, 4))
+fig2, (axL, axR) = plt.subplots(1, 2, figsize=(9.2, 3.7))
 
 barsL = axL.bar(models, overall, color=colors, width=0.6)
 axL.axhline(0, color=viz.INK_2, linewidth=0.8)
-axL.set_ylabel("Overall SBP MAE change (mmHg)")
+axL.set_ylabel("Overall SBP MAE change (mmHg)", fontsize=10.5)
+axL.tick_params(axis="both", labelsize=10)
+plt.setp(axL.get_xticklabels(), rotation=20, ha="right")
 viz.title(axL, "Cost: overall accuracy", "weighted minus unweighted, positive = weighting costs accuracy")
 for b, v in zip(barsL, overall):
     axL.text(b.get_x() + b.get_width() / 2, v + (0.08 if v >= 0 else -0.08),
-              f"{v:+.2f}", ha="center", va="bottom" if v >= 0 else "top", fontsize=8.5)
+              f"{v:+.2f}", ha="center", va="bottom" if v >= 0 else "top", fontsize=10)
 viz.despine(axL)
 
 barsR = axR.bar(models, above170, color=colors, width=0.6)
 axR.axhline(0, color=viz.INK_2, linewidth=0.8)
-axR.set_ylabel("Above-170 mmHg SBP MAE change (mmHg)")
+axR.set_ylabel("Above-170 mmHg SBP MAE change (mmHg)", fontsize=10.5)
+axR.tick_params(axis="both", labelsize=10)
+plt.setp(axR.get_xticklabels(), rotation=20, ha="right")
 viz.title(axR, "Benefit: high-BP coverage", "weighted minus unweighted, negative = weighting reduces error")
 for b, v in zip(barsR, above170):
     axR.text(b.get_x() + b.get_width() / 2, v - 0.4, f"{v:.2f}", ha="center",
-              va="top", fontsize=8.5)
+              va="top", fontsize=10)
 viz.despine(axR)
 
-fig2.suptitle("BP-bin weighting's cost and benefit, all five models", fontsize=12,
-              weight="bold", y=1.03)
+fig2.suptitle("BP-bin weighting's cost and benefit, all five models", fontsize=13,
+              weight="bold", y=1.04)
 plt.tight_layout()
 fig2.savefig(OUT2, bbox_inches="tight")
 fig2.savefig(OUT2.with_suffix(".pdf"), bbox_inches="tight")
