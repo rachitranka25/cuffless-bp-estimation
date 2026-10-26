@@ -1,5 +1,5 @@
-"""Professor's review item (round 3), personalization uncertainty: Table XII's
-three-seed check covers calibration-free only, so the personalization claims
+"""Personalization uncertainty: the three-seed check elsewhere in this project
+covers calibration-free only, so the personalization claims
 (naive-split AAMI pass, chronological-split AAMI fail, and the gap between the
 two) carry no interval anywhere in the manuscript. This matters most for the
 AAMI verdict at k=25, where the best chronological-split DBP SDE (8.75 mmHg,
