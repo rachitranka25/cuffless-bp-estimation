@@ -68,11 +68,14 @@ def mae(y_true, y_pred, idx, target):
 # (marked *) vs a single run — this is cell-specific, not uniform per model:
 # calfree is 3-seed for rf/gb/transformer but a single schedule-fixed run
 # (marked †, deliberately not seed-averaged) for cnn/resnet; leaky/calbased
-# is 3-seed for cnn/resnet/transformer but single-run for rf/gb. Guessing a
-# uniform per-model rule here was exactly the earlier bug (it silently
-# 3-seed-averaged cnn/resnet's calfree using the wrong, non-schedule-fixed
-# seed1/seed2 files) — this table is transcribed directly from Table IV's
-# own */† annotations instead.
+# is 3-seed for cnn/resnet/transformer (extra seeds were run for all three
+# to check the architecture-dependence finding is not a seed artefact,
+# transformer's included since it sets the headline minimum gap) but a
+# single seed-0 run for rf/gb, which were never re-seeded on leaky/calbased.
+# Guessing a uniform per-model rule here was exactly the earlier bug (it
+# silently 3-seed-averaged cnn/resnet's calfree using the wrong,
+# non-schedule-fixed seed1/seed2 files) — this table is transcribed
+# directly from Table IV's own */† annotations instead.
 THREE_SEED_CELLS = {
     ("rf", "calfree"), ("gb", "calfree"), ("transformer", "calfree"),
     ("cnn", "leaky"), ("cnn", "calbased"),

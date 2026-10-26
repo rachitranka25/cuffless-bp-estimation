@@ -82,9 +82,12 @@ def despine(ax, keep=("left", "bottom")):
         ax.spines[side].set_visible(side in keep)
 
 
-def title(ax, text, sub=None):
+def title(ax, text, sub=None, fontsize=None, sub_fontsize=8):
     """Title plus an optional recessive one-line explanation."""
-    ax.set_title(text, loc="left", pad=14 if sub else 6)
+    kw = dict(loc="left", pad=14 if sub else 6)
+    if fontsize is not None:
+        kw["fontsize"] = fontsize
+    ax.set_title(text, **kw)
     if sub:
-        ax.text(0, 1.02, sub, transform=ax.transAxes, fontsize=8,
+        ax.text(0, 1.02, sub, transform=ax.transAxes, fontsize=sub_fontsize,
                 color=INK_2, va="bottom")

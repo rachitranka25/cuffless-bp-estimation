@@ -143,7 +143,7 @@ METRICS = [
     ("mae", "MAE (mmHg)", "how far off it is on average — lower is better",
      5.0, "clinical target 5"),
     ("sde", "SD of error (mmHg)",
-     "are the errors all similar, or all over the place — this is what AAMI limits",
+     "are the errors all similar, or scattered — AAMI limits this",
      8.0, "AAMI limit 8"),
     ("r", "Pearson r",
      "1.0 = follows the patient up and down, 0.0 = one answer for everyone",
@@ -152,17 +152,27 @@ METRICS = [
 
 
 def fig_leakage_gap(runs):
+    """Two separate figures (SBP, DBP), three panels each.
+
+    Originally one 2x3 figure; at full double-column print width that put six
+    panels into about 6.5 inches, each too small to read. Splitting by target
+    gives each row the full page width to itself instead.
+    """
     models, protos = _present(runs)
     if not models:
         return
-    nrow, ncol = 2, len(METRICS)
-    fig, axes = plt.subplots(nrow, ncol, figsize=(5.4 * ncol, 3.35 * nrow),
-                             squeeze=False)
     width = 0.8 / max(1, len(protos))
 
-    for row, target in enumerate(("sbp", "dbp")):
+    for target, fname in (("sbp", "1_leakage_gap_sbp.png"), ("dbp", "1_leakage_gap_dbp.png")):
+        ncol = len(METRICS)
+        # Figsize reduced from the original (5.4in/panel) toward the actual
+        # double-column print width (~6.9in at 0.92\textwidth) so the source
+        # font sizes below survive closer to true size at print, without
+        # shrinking panels so far that bars/labels collide.
+        fig, axes = plt.subplots(1, ncol, figsize=(5.4 * ncol, 4.3), squeeze=False)
+        axes = axes[0]
         for col, (key, ylab, sub, limit, limit_label) in enumerate(METRICS):
-            ax = axes[row][col]
+            ax = axes[col]
             top = 0
             for j, p in enumerate(protos):
                 vals, xs = [], []
@@ -175,32 +185,32 @@ def fig_leakage_gap(runs):
                 if not vals:
                     continue
                 ax.bar(xs, vals, width=width * 0.92, color=PROTO_COLOR[p],
-                       label=p if (row == 0 and col == 0) else None,
+                       label=p if col == 0 else None,
                        edgecolor="none")
                 top = max(top, max(vals))
                 for x, v in zip(xs, vals):
-                    ax.text(x, v + top * 0.03, f"{v:.2f}" if key == "r" else f"{v:.1f}",
-                            ha="center", va="bottom", fontsize=7.2, color=viz.INK_2,
+                    ax.text(x, v + top * 0.025, f"{v:.2f}" if key == "r" else f"{v:.1f}",
+                            ha="center", va="bottom", fontsize=9.3, color=viz.INK_2,
                             rotation=90)
             if limit:
                 ax.axhline(limit, ls="--", lw=1.3, color=viz.BAD)
-                ax.text(len(models) - 0.44, limit + top * 0.02,
-                        limit_label, ha="right", fontsize=8,
-                        color=viz.BAD, weight="bold")
+                ax.text(0.98, limit, limit_label, ha="right", va="bottom",
+                        transform=ax.get_yaxis_transform(), fontsize=10.5,
+                        color=viz.BAD, weight="bold",
+                        bbox=dict(facecolor=viz.SURFACE, edgecolor="none",
+                                   alpha=0.88, pad=1.5))
             ax.set_ylim(0, top * 1.38)
             ax.set_xticks(range(len(models)))
-            ax.set_xticklabels([MODEL_LABEL[m].replace(" ", "\n") for m in models],
-                                fontsize=8.0)
-            ax.set_ylabel(ylab)
+            ax.set_xticklabels([MODEL_LABEL[m] for m in models], fontsize=10.5,
+                                rotation=28, ha="right")
+            ax.set_ylabel(ylab, fontsize=11.5)
+            ax.tick_params(axis="y", labelsize=10.5)
             viz.title(ax, f"{target.upper()} — {key.upper() if key == 'mae' else ylab.split(' (')[0]}",
-                      sub)
+                      sub, fontsize=12.5, sub_fontsize=10)
             viz.despine(ax)
-    axes[0][0].legend(ncol=2, loc="upper left", fontsize=8.4)
-    fig.suptitle("Same model, same training clips — only the test patients change.  "
-                 "Orange/yellow = the model had already met them; blue/sky blue = it had not.",
-                 fontsize=12.5, weight="bold", x=0.006, ha="left", y=1.0)
-    plt.tight_layout()
-    save(fig, "1_leakage_gap.png")
+        axes[0].legend(ncol=2, loc="upper left", fontsize=11)
+        plt.tight_layout(w_pad=2.4)
+        save(fig, fname)
 
 
 SBP_BANDS = [0, 90, 110, 130, 150, 170, 1000]
@@ -585,8 +595,6 @@ def fig_domain_shift_control(runs):
     ax.set_ylabel("how much higher it reads on the watch\nthan on hospital patients (mmHg)")
     ax.set_ylim(0, max(r["shift_bal"] for r in rows) * 1.45)
     ax.legend(loc="upper left", fontsize=9.5)
-    viz.title(ax, "Systolic \u2014 how far the predictions moved",
-              "grey is what we measured first; blue is the same test without our weighting")
     viz.despine(ax)
     plt.tight_layout()
     save(fig, "3_shift_amount.png")
@@ -741,8 +749,6 @@ def fig_personalization():
         viz.despine(ax)
     axes[1].legend(fontsize=7.4, ncol=1, loc="upper left",
                    bbox_to_anchor=(1.02, 1.0), borderaxespad=0)
-    fig.suptitle("How many cuff readings a new user has to provide",
-                 fontsize=13, weight="bold", x=0.008, ha="left", y=1.02)
     plt.tight_layout()
     save(fig, "5_personalization.png")
 
