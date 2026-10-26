@@ -1,8 +1,8 @@
-"""Item 2 (professor's 3rd-round feedback): seed variance for leaky/calbased,
-CNN and ResNet, seeds 1 and 2 — matches the existing seed-0 config exactly
-(standard OneCycleLR, no lr_decay_epochs override; these protocols were never
-directly implicated in the schedule-confound finding, only calfree was, so
-they're not being schedule-fixed here — see the deck's Item 1/2 slides for why).
+"""Seed variance for leaky/calbased, CNN and ResNet, seeds 1 and 2 — matches
+the existing seed-0 config exactly (standard OneCycleLR, no lr_decay_epochs
+override; these protocols were never directly implicated in the
+schedule-confound finding, only calfree was, so they're not being
+schedule-fixed here).
 
 Paste into a Kaggle cell after the usual setup (BP_ROOT / sys.path already set).
 

@@ -372,7 +372,7 @@ def deep(model):
              f"                        epochs=EPOCHS, batch_size=BATCH{kw})"),
         md("### Seed variance, on calbased and leaky too",
            "",
-           "The professor's follow-up: the architecture-dependent leakage-gap ratio "
+           "The architecture-dependent leakage-gap ratio "
            "(calfree vs. calbased/leaky) is only as trustworthy as both sides of it — "
            "calfree already gets 3 seeds above, this does the same for calbased and "
            "leaky. `aami` is left at one seed; it isn't part of the leakage-gap ratio."),

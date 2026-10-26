@@ -1,7 +1,9 @@
-# Project  — Cuffless Blood Pressure Estimation
+# Evaluation-Protocol Leakage in Cuffless Blood Pressure Estimation from PPG
 
-TEEP research project — **Project B only** (Project A, the PTB-XL ECG work, belongs
-to the other student).
+Code and results for a study measuring how much evaluation-protocol leakage inflates
+apparent accuracy in cuffless, PPG-based blood pressure estimation, across five model
+architectures, and how much a brief few-shot personalization step recovers under both
+a naive and a genuinely chronological calibration/evaluation split.
 
 **Question.** How much does cuffless PPG-based BP estimation degrade under a rigorous
 subject-independent, cross-setting protocol compared to the leakage-prone evaluation
@@ -10,10 +12,6 @@ step recover?
 
 **Results live in [`results/overview/RESULTS.md`](results/overview/RESULTS.md)**, generated
 from the run files so it cannot drift from the numbers.
-
-**Picking this up cold, or on another machine? Start with
-[`HANDOFF.md`](HANDOFF.md)** — state of play, the findings worth defending, the
-Windows-specific fixes, and what comes next.
 
 ## Setup
 
@@ -80,8 +78,8 @@ path follows.
 | Role | Train + honest test | External domain-shift test |
 | Source | [Kaggle mirror](https://www.kaggle.com/datasets/weinanwangrutgers/pulsedb-balanced-training-and-testing) of [PulseDB](https://github.com/pulselabteam/PulseDB), CC BY-NC-SA 4.0 | [UCI](https://archive.ics.uci.edu/dataset/495/ppg+dalia) |
 
-Per the spec (§M, §N month 2) this is the **VitalDB portion** of PulseDB; the full
-MIMIC-III + VitalDB release (~380 GB plus MATLAB) is explicitly not required.
+This project uses the **VitalDB portion** of PulseDB; the full MIMIC-III + VitalDB
+release (~380 GB plus MATLAB) is not required.
 
 Both datasets are stored in the same shape — `(N, 2, 1250)` at 125 Hz — so a model trained
 on PulseDB runs on PPG-DaLiA without a line of code changing. That is the point of the
@@ -145,10 +143,10 @@ personalize(model="gb", source="calfree")         # the few-shot curve
 python3 -m train --model gb --protocol calfree    # same thing from the shell
 ```
 
-Built in, because the spec asks for them and they are easy to forget once training starts:
+Built in, because they are easy to forget once training starts:
 
-- **BP-bin balancing** (spec §L, *"stratified sampling or a weighted loss over BP value
-  bins"*). 55% of the training clips sit between 90 and 120 mmHg and 1.8% above 160; left
+- **BP-bin balancing** — stratified sampling or a weighted loss over BP value bins.
+  55% of the training clips sit between 90 and 120 mmHg and 1.8% above 160; left
   alone a model learns to answer "about 110" and is worst for the patients who matter most.
 - **Subject-disjointness assertions** on every honest protocol. A silent leak would inflate
   exactly the number this project exists to measure.
@@ -190,14 +188,12 @@ python3 scripts/build_notebooks.py          # regenerates the launcher notebooks
 python3 scripts/plot_results.py             # figures, from whatever has been run
 python3 scripts/make_results_report.py      # results/overview/RESULTS.md
 
-# dataset figures and decks
+# dataset figures
 python3 scripts/visualize_processed.py
 python3 scripts/visualize_dalia.py
 python3 scripts/plot_preprocessing_evidence.py
 python3 scripts/plot_literature.py
 python3 scripts/plot_training_plan.py
-python3 scripts/build_report_deck.py
-python3 scripts/build_training_plan_deck.py
 ```
 
 ## Status
@@ -229,9 +225,9 @@ calls, which is what's in the queue scripts above.
 
 [`bp/`](bp/) is not a separate copy of the pipeline — it is a staging folder that
 [`scripts/make_drive_folder.py`](scripts/make_drive_folder.py) assembles on demand by
-hard-linking this repository's own `src/`, `notebooks/`, and `HANDOFF.md` into it for
-upload to Google Drive (see [`bp/README.txt`](bp/README.txt)); it is not committed with
-its own copy of those files.
+hard-linking this repository's own `src/` and `notebooks/` into it for upload to
+Google Drive (see [`bp/README.txt`](bp/README.txt)); it is not committed with its own
+copy of those files.
 
 `results/models/<model>/` holds the output of every run (metrics, per-clip predictions,
 and checkpoints for the deep models), which is what the manuscript's numbers are computed

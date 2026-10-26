@@ -10,8 +10,7 @@ deliberate deviations from the published recipe (one joint SBP+DBP network
 instead of two, and 50 epochs instead of 100) are explained where they first
 matter, in src/train.py's Config docstring.
 
-The 13 training jobs actually run (documented in HANDOFF.md's "professor's
-PC" section) were executed by hand, cell by cell, from
+The 13 training jobs actually run were executed by hand, cell by cell, from
 notebooks/03c_transformer_colab.ipynb on a separate machine with a real GPU —
 not from a standalone queue script, since at the time this was a one-off
 rather than a repeated sweep. This script is a batch-script equivalent,

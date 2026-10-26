@@ -1,5 +1,5 @@
-"""Professor's priority #1 (2nd round): the early-vs-late personalization
-table, side by side with the original, for all five models, at every k.
+"""The early-vs-late personalization table, side by side with the original,
+for all five models, at every k.
 
 "Original" = personalize()'s storage-order first-k (results/models/*/​
 *_personalization_calfree.json, pick='first'). "True chronological" = the

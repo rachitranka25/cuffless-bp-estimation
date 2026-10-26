@@ -1,23 +1,24 @@
 # Experiment 1 — 20-epoch results archive
 
-Snapshot of the original 20-epoch run, before the professor's feedback triggered the
-50-epoch / 3-seed retrain (Experiment 2).
+Snapshot of the original 20-epoch run, kept for the learning-rate-schedule confound
+analysis (see the manuscript), before the 50-epoch / 3-seed retrain (Experiment 2,
+i.e. the main `results/` tree this repository otherwise reports).
 
 ## What's genuine (copied straight from the original run's output files)
 
 - `results/models/rf/` — Random Forest. No epoch concept (tree ensemble); this is the
   seed-0 run from before seed-variance was added. Predictions, metrics, and figures.
 - `results/models/gb/` — Gradient Boosting. Same as above.
-- `results/models/cnn/` — recovered from the user's own backup (`models_result_20epoch.zip`,
-  Downloads). All 4 protocols, dalia domain-shift (balanced + nobalance), predictions,
+- `results/models/cnn/` — restored from a backup of the original run's output
+  directory. All 4 protocols, dalia domain-shift (balanced + nobalance), predictions,
   checkpoints. Confirmed `epochs: 20` in every run's config, and the metrics match exactly
   what was documented at the time (SBP/DBP MAE 14.86/9.01 balanced, 12.07/7.98 nobalance).
 - `results/models/resnet/` — same recovery, same verification (13.58/8.97 balanced,
   13.15/8.67 nobalance).
 - `results/models/transformer/` — the original lightweight custom Transformer (20 epochs,
-  our own recipe per spec §I, not DMT's). Genuinely intact, nothing was ever deleted for
+  this project's own recipe, not DMT's). Genuinely intact, nothing was ever deleted for
   this model. `results/models/transformer/from_recovered_zip/` holds a second `calfree`-only
-  run for this model found in the same recovered zip — its numbers differ slightly from the
+  run for this model found in the same backup — its numbers differ slightly from the
   intact copy (16.99/9.49 vs 16.29/9.77 SBP/DBP MAE), kept for reference rather than merged in.
 
 ## Figures
