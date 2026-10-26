@@ -23,12 +23,28 @@ __pycache__/
 # review, kept out of the public repo until that's resolved.
 docs/
 ieee_paper/
+ieee_15page_journal/
+ieee_8page_conference/
+
+# Internal workflow notes and presentation/report-deck builders — not part
+# of the pipeline that produces the manuscript's numbers, figures or tables.
+HANDOFF.md
+scripts/build_final_deck.py
+scripts/build_report_deck.py
+scripts/build_training_deck.py
+scripts/build_training_plan_deck.py
+scripts/build_journal_paper.py
+src/deck.py
+
+# Superseded by experiment_1_20epoch/ (same files, with the explanatory
+# README this folder lacks).
+models_result_20epoch/
 
 # bp/ is a Colab staging folder assembled on demand by
 # scripts/make_drive_folder.py, which hard-links src/, notebooks/,
-# HANDOFF.md, and scripts/prepare_colab_upload.py into it. Everything
-# except README.txt here is therefore a generated duplicate of files
-# already tracked at the repository root.
+# and scripts/prepare_colab_upload.py into it. Everything except
+# README.txt here is therefore a generated duplicate of files already
+# tracked at the repository root.
 bp/src/
 bp/notebooks/
 bp/scripts/

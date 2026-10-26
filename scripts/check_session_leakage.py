@@ -1,5 +1,6 @@
-"""Professor's concern #1: were personalization's calibration and evaluation
-clips drawn from the same continuous recording?
+"""Checks whether personalization's calibration and evaluation clips were
+drawn from the same continuous recording, and reruns the k=25 sweep on a
+genuinely chronological split if so.
 
 Finding: PulseDB's calfree_test Subset files store each subject's 400 clips in
 an order uncorrelated with true recording time (confirmed via SegIDX from the
