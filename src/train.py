@@ -870,7 +870,8 @@ def personalize(model="gb", source="calfree", shots=(0, 1, 3, 5, 10, 25),
             for i, t in enumerate(("sbp", "dbp"))}
     for t, h in head.items():
         print(f"  {t.upper()} headroom: MAE {h['mae']:.2f} -> {h['oracle_offset_mae']:.2f} "
-              f"with a perfect per-subject offset "
+              f"with an oracle constant per-subject offset (median error, fit on the "
+              f"subject's own test labels) "
               f"({h['recoverable_frac'] * 100:.0f}% recoverable, "
               f"{h['between_subject_variance_share'] * 100:.0f}% of error variance "
               f"is between-subject)")
@@ -899,7 +900,9 @@ def personalize(model="gb", source="calfree", shots=(0, 1, 3, 5, 10, 25),
             print(f"    k={k:<3} n={row['n_scored']:>6,}  "
                   f"SBP MAE {row['results']['sbp']['mae']:6.2f}  "
                   f"DBP MAE {row['results']['dbp']['mae']:6.2f}  "
-                  f"AAMI {'PASS' if row['results']['sbp']['aami_pass'] else 'FAIL'}")
+                  f"AAMI(|ME|<=5, SDE<=8) "
+                  f"SBP {'PASS' if row['results']['sbp']['aami_pass'] else 'FAIL'} "
+                  f"DBP {'PASS' if row['results']['dbp']['aami_pass'] else 'FAIL'}")
         curves[pick] = rows
 
     out = dict(model=cfg.model, source=source, method="affine recalibration",
