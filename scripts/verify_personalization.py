@@ -7,7 +7,7 @@ per-clip predictions (no retraining), using the exact offset-only (k<3) /
 splits, and diffs each recomputed value against the value printed in the paper:
 
   Part 1  naive (storage-order first-k) split, via src.train.personalize()
-          -> Table 12 naive column, Table 17 (full k-sweep), and the oracle
+          -> Table 12 naive column, Supplementary Table S4 (full k-sweep), and the oracle
              ceiling of Table 9
   Part 2  chronological split (earliest-k clips by segment index calibrate,
           all later clips evaluate) -> Table 10 (MAE/SDE, full k-sweep) and
@@ -49,7 +49,7 @@ PAPER_T9 = {
     "resnet":      dict(sbp=(13.94, 9.13, 35), dbp=(8.94, 5.40, 40)),
     "transformer": dict(sbp=(15.44, 9.34, 39), dbp=(8.47, 4.94, 42)),
 }
-# Table 17: naive-split DBP MAE at k = 1, 3, 5, 10, 25
+# Supplementary Table S4: naive-split DBP MAE at k = 1, 3, 5, 10, 25
 PAPER_T17 = {
     "rf":          (7.17, 7.32, 5.53, 5.00, 4.81),
     "gb":          (7.40, 6.77, 5.41, 4.90, 4.74),
@@ -146,7 +146,7 @@ for model in MODELS:
         check(f"Table 9 {LABEL[model]} {t.upper()} oracle", h["oracle_offset_mae"], orc)
         check(f"Table 9 {LABEL[model]} {t.upper()} recovered %", h["recoverable_frac"] * 100, pct)
     for i, k in enumerate(SHOTS):
-        check(f"Table 17 {LABEL[model]} k={k}", rows[k]["dbp"]["mae"], PAPER_T17[model][i])
+        check(f"Table S4 {LABEL[model]} k={k}", rows[k]["dbp"]["mae"], PAPER_T17[model][i])
     k0, nv, nv_flag, _, _ = PAPER_T12[model]
     check(f"Table 12 {LABEL[model]} k=0", rows[0]["dbp"]["mae"], k0)
     check(f"Table 12 {LABEL[model]} naive k=25", rows[25]["dbp"]["mae"], nv)
@@ -178,7 +178,7 @@ for model in MODELS:
 # ============================================================================
 print()
 print("=" * 90)
-print("RESULT -- recomputed values vs. values printed in Tables 9, 10, 12 and 17")
+print("RESULT -- recomputed values vs. values printed in Tables 9, 10, 12 and S4")
 print("=" * 90)
 print(f"cells checked: {n_checked}")
 if mismatches:
