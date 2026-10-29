@@ -739,10 +739,9 @@ def fig_personalization():
                 label = f"{d['model']} · {pick}"
                 ax.plot(k, v, "-", marker="o", ms=4, label=label)
                 picks_seen.append(label)
+    # No AAMI line here: AAMI's criterion is on bias (|ME| <= 5) and error SD
+    # (<= 8), not on MAE, so a 5 mmHg line on an MAE axis would misstate it.
     for ax, target in zip(axes, ("sbp", "dbp")):
-        ax.axhline(5, ls="--", color=viz.BAD, lw=1.3)
-        ax.text(ax.get_xlim()[1], 5.2, "AAMI 5 mmHg", ha="right", fontsize=8,
-                color=viz.BAD, weight="bold")
         ax.set_xlabel("calibration readings per new subject (k)")
         ax.set_ylabel("MAE (mmHg)")
         viz.title(ax, target.upper(), "k = 0 is the uncalibrated number")
