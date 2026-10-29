@@ -92,7 +92,7 @@ Spec sections J and L — the project's contribution. A few of a new patient's o
 | ResNet1D | 7.38 | fail (C) |
 | Transformer (DMT-style) | 6.92 | fail (C) |
 
-DBP MAE still improves substantially under the honest test (roughly a fifth to a third off across models) — personalization is real and worth reporting. It does not cross AAMI's SD≤8 threshold once calibration and evaluation are genuinely separated in time; bias stays under 2 mmHg throughout, so it is the spread that falls short, not the bias. **Corrected claim: personalization meaningfully reduces DBP error; it does not reach the AAMI bar once tested honestly.** Systolic's SD stays above the AAMI limit either way — the ceiling analysis further down explains why no per-patient correction could close it.
+DBP MAE still improves under the honest test (13–21% off at k=25 across models) — personalization is real and worth reporting. It does not cross AAMI's SD≤8 threshold once calibration and evaluation are genuinely separated in time; bias stays within 3 mmHg (under 2 mmHg except Gradient Boosting at k=3, −2.92 mmHg), so it is the spread that falls short, not the bias. With only 1–3 early calibration clips, every model's DBP error is worse than with none. **Corrected claim: personalization meaningfully reduces DBP error; it does not reach the AAMI bar once tested honestly.** Systolic's SD stays above the AAMI limit either way — the ceiling analysis further down explains why no per-patient correction could close it.
 
 ### 2. How much calibration data is needed
 
