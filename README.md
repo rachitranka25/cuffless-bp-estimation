@@ -202,8 +202,8 @@ Complete. All five models (RF, GB, 1D-CNN, ResNet1D, Transformer) are trained an
 under all four protocols, three seeds each where noted; the leakage gap and the PPG-DaLiA
 domain-shift control are measured; few-shot personalization is evaluated under both a
 naive (storage-order) and a genuinely chronological calibration/evaluation split; and the
-manuscript is written and under journal review (not included in this repository while
-review is open).
+manuscript is written and in preparation for journal submission (not included in this
+repository until it is published).
 
 Current numbers, and how to reproduce each one, are in
 [`results/overview/RESULTS.md`](results/overview/RESULTS.md).
