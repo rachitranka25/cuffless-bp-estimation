@@ -82,12 +82,20 @@ def despine(ax, keep=("left", "bottom")):
         ax.spines[side].set_visible(side in keep)
 
 
-def title(ax, text, sub=None, fontsize=None, sub_fontsize=8):
-    """Title plus an optional recessive one-line explanation."""
-    kw = dict(loc="left", pad=14 if sub else 6)
+def title(ax, text, sub=None, fontsize=None, sub_fontsize=8, gap=4):
+    """Title plus an optional recessive one-line explanation.
+
+    The subtitle sits a fixed number of points above the axes and the title a
+    fixed number of points above the subtitle, so the two never touch whatever
+    the axes height or font sizes (an axes-fraction offset collapsed on short
+    panels and large titles).
+    """
+    kw = dict(loc="left", pad=6)
     if fontsize is not None:
         kw["fontsize"] = fontsize
-    ax.set_title(text, **kw)
     if sub:
-        ax.text(0, 1.02, sub, transform=ax.transAxes, fontsize=sub_fontsize,
-                color=INK_2, va="bottom")
+        ax.annotate(sub, xy=(0, 1), xycoords="axes fraction", xytext=(0, 4),
+                    textcoords="offset points", fontsize=sub_fontsize, color=INK_2,
+                    ha="left", va="bottom", annotation_clip=False)
+        kw["pad"] = 4 + 1.3 * sub_fontsize + gap
+    ax.set_title(text, **kw)
