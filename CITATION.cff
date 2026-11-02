@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this code or these results, please cite the accompanying article."
+title: "Evaluation-Protocol Leakage in Cuffless Blood Pressure Estimation from PPG: How Much It Inflates Accuracy, and How Much Brief Personalization Recovers, Across Five Model Architectures"
+type: software
+authors:
+  - family-names: Ranka
+    given-names: Rachit
+    affiliation: "Department of Computer Science Engineering, Chandigarh University, Mohali, India"
+  - family-names: Tandon
+    given-names: Harshit
+    affiliation: "Department of Computer Science Engineering, Chandigarh University, Mohali, India"
+  - family-names: Sadrawi
+    given-names: Muammar
+    affiliation: "Department of Biotechnology, Universitas Bio Scientia Internasional Indonesia, Jakarta, Indonesia"
+  - family-names: Mathunjwa
+    given-names: Bhekumuzi M.
+    affiliation: "Department of Mechanical Engineering, Yuan Ze University, Taoyuan, Taiwan"
+    email: bmmathunjwa@saturn.yzu.edu.tw
+repository-code: "https://github.com/rachitranka25/cuffless-bp-estimation"
+license: MIT

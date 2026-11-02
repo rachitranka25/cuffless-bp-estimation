@@ -10,6 +10,11 @@ subject-independent, cross-setting protocol compared to the leakage-prone evalua
 commonly reported — and how much of that gap can a lightweight few-shot personalization
 step recover?
 
+**Authors.** Rachit Ranka, Harshit Tandon (Chandigarh University), Muammar Sadrawi
+(Universitas Bio Scientia Internasional Indonesia) and Bhekumuzi M. Mathunjwa (Yuan Ze
+University; corresponding author). The manuscript is under review; see
+[`CITATION.cff`](CITATION.cff) for how to cite this repository.
+
 **Results live in [`results/overview/RESULTS.md`](results/overview/RESULTS.md)**, generated
 from the run files so it cannot drift from the numbers.
 
