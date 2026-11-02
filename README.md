@@ -12,7 +12,7 @@ step recover?
 
 **Authors.** Rachit Ranka, Harshit Tandon (Chandigarh University), Muammar Sadrawi
 (Universitas Bio Scientia Internasional Indonesia) and Bhekumuzi M. Mathunjwa (Yuan Ze
-University; corresponding author). The manuscript is under review; see
+University; corresponding author). The manuscript is in preparation for submission; see
 [`CITATION.cff`](CITATION.cff) for how to cite this repository.
 
 **Results live in [`results/overview/RESULTS.md`](results/overview/RESULTS.md)**, generated
