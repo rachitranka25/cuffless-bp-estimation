@@ -44,12 +44,19 @@ mpl.rcParams.update({
     "axes.edgecolor": "black", "xtick.color": "black", "ytick.color": "black",
     "grid.color": "#e6e6e6",
 })
-# Monochrome palette: black, white and greys only (the colour palette of the
-# slide figures read as decorative in print).
+# Restrained palette: a few muted colours of the kind common in journal figures
+# (the saturated slide palette read as decorative in print). Titles and text stay black.
+BLUE, ORANGE, GREEN, RED, PURPLE, GREY = "#4C72B0", "#DD8452", "#55A868", "#C44E52", "#8172B3", "#A8A8A8"
 viz.SURFACE, viz.INK, viz.INK_2 = "white", "black", "black"
-viz.MUTED, viz.BLUE, viz.BAD = "#9e9e9e", "black", "black"
-GREY_SEEN = {"leaky": "#e3e3e3", "calbased": "#b0b0b0"}
-GREY_UNSEEN = {"calfree": "#5c5c5c", "aami": "black"}
+viz.MUTED, viz.BLUE, viz.BAD = GREY, BLUE, RED
+GREY_SEEN = {"leaky": "#A6C1E0", "calbased": BLUE}          # seen patients: blues
+GREY_UNSEEN = {"calfree": ORANGE, "aami": RED}               # unseen patients: warm colours
+
+
+def tint(c, f=0.45):
+    """Mix a colour with white (f = share of the colour kept)."""
+    from matplotlib.colors import to_rgb
+    return tuple(1 - f * (1 - v) for v in to_rgb(c))
 
 
 def title(ax, text, sub=None, fontsize=9, sub_fontsize=7.5):
@@ -71,7 +78,7 @@ PCOLOR = {**GREY_SEEN, **GREY_UNSEEN}
 PNAME = {"leaky": "leaky", "calbased": "calbased", "calfree": "calfree", "aami": "AAMI"}
 TICK = {"rf": "Random\nForest", "gb": "Gradient\nBoosting", "cnn": "1D-CNN", "resnet": "ResNet1D",
         "transformer": "Transformer"}
-MCOLOR = {"rf": "black", "gb": "#3d3d3d", "cnn": "#6a6a6a", "resnet": "#8e8e8e", "transformer": "#ababab"}
+MCOLOR = {"rf": BLUE, "gb": ORANGE, "cnn": GREEN, "resnet": RED, "transformer": PURPLE}
 MMARK = {"rf": "o", "gb": "s", "cnn": "^", "resnet": "D", "transformer": "v"}
 
 
@@ -92,14 +99,14 @@ def fig_protocols():
         ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=8,
                 color=tcolor, weight="bold", zorder=3, linespacing=1.35)
 
-    spec = [("Leaky", "random clips, any patient", GREY_SEEN["leaky"], "Training pool",
+    spec = [("Leaky", "random clips, any patient", tint(GREY_SEEN["leaky"], 0.6), "Training pool",
              "Test: random clips\n(patients also in training)", True, "black"),
-            ("Calibration-based", "held-out clips, same patients", GREY_SEEN["calbased"], "Training pool",
+            ("Calibration-based", "held-out clips, same patients", tint(GREY_SEEN["calbased"]), "Training pool",
              "Test: held-out clips\n(patients also in training)", True, "black"),
-            ("Calibration-free", "144 unseen patients", GREY_UNSEEN["calfree"], "Training pool\n(1,164 patients)",
-             "Test: 144 new\npatients", False, "white"),
-            ("AAMI", "116 unseen patients, full BP range", GREY_UNSEEN["aami"], "Training pool\n(1,164 patients)",
-             "Test: 116 new patients\n(full BP range)", False, "white")]
+            ("Calibration-free", "144 unseen patients", tint(GREY_UNSEEN["calfree"]), "Training pool\n(1,164 patients)",
+             "Test: 144 new\npatients", False, "black"),
+            ("AAMI", "116 unseen patients, full BP range", tint(GREY_UNSEEN["aami"]), "Training pool\n(1,164 patients)",
+             "Test: 116 new patients\n(full BP range)", False, "black")]
     fig, axes = plt.subplots(2, 2, figsize=(WIDTH, 4.3))
     for ax, (name, sub, color, train, test, overlap, tcol) in zip(axes.flat, spec):
         ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
@@ -182,7 +189,7 @@ def fig_weighting():
 
     fig, (a, b) = plt.subplots(1, 2, figsize=(WIDTH, 3.0))
     names = [LABEL[m] for m in MODELS]
-    colors = ["#8a8a8a"] * len(MODELS)
+    colors = [BLUE] * len(MODELS)
     for ax, vals, ttl, sub, ylab in (
             (a, overall, "Cost: overall SBP error", "Weighted minus unweighted; positive = higher error",
              "Change in SBP MAE (mmHg)"),
@@ -226,7 +233,7 @@ def fig_literature():
         rows = sorted(data, key=lambda r: r[col])
         y = np.arange(len(rows))[::-1]
         vals = [r[col] for r in rows]
-        ax.barh(y, vals, height=0.62, color=["black" if r[3] else "#bdbdbd" for r in rows],
+        ax.barh(y, vals, height=0.62, color=[BLUE if r[3] else GREY for r in rows],
                 edgecolor="black", linewidth=0.5)
         for yy, v, r in zip(y, vals, rows):
             ax.text(v + max(vals) * 0.012, yy, f"{v:.2f}", va="center", fontsize=7.5,
@@ -238,7 +245,7 @@ def fig_literature():
         ax.set_xlim(0, max(vals) * 1.12)
         ax.set_xlabel("MAE (mmHg)")
         ax.grid(axis="y", visible=False)
-        title(ax, ttl, "Black: this study, unweighted, seed-0 runs; grey: published results",
+        title(ax, ttl, "Blue: this study, unweighted, seed-0 runs; grey: published results",
                   fontsize=9, sub_fontsize=7.5)
         viz.despine(ax)
     fig.subplots_adjust(hspace=0.55)
@@ -266,9 +273,9 @@ def shift_rows():
 def fig_shift(rows):
     fig, ax = plt.subplots(figsize=(WIDTH, 3.2))
     x = np.arange(len(rows)); w = 0.36
-    ax.bar(x - w / 2, [r["shift_w"] for r in rows], w, color="#c4c4c4", edgecolor="black", linewidth=0.5,
+    ax.bar(x - w / 2, [r["shift_w"] for r in rows], w, color=GREY, edgecolor="black", linewidth=0.5,
            label="With BP-bin weighting (primary)")
-    ax.bar(x + w / 2, [r["shift_u"] for r in rows], w, color="black", edgecolor="black", linewidth=0.5,
+    ax.bar(x + w / 2, [r["shift_u"] for r in rows], w, color=BLUE, edgecolor="black", linewidth=0.5,
            label="Without BP-bin weighting")
     top = max(r["shift_w"] for r in rows)
     for i, r in enumerate(rows):
@@ -370,8 +377,7 @@ def fig_training():
 
 
 def fig_bland():
-    from matplotlib.colors import LinearSegmentedColormap
-    cmap = LinearSegmentedColormap.from_list("white_grey", ["white", "#6e6e6e"]); vmax = 12.0
+    cmap = mpl.colormaps["coolwarm"]; vmax = 12.0
     fig, axes = plt.subplots(2, 1, figsize=(WIDTH, 7.0))
     for ax, (t, k) in zip(axes, (("SBP", 0), ("DBP", 1))):
         bias = np.full((5, 4), np.nan); lim = np.full((5, 4), np.nan)
@@ -381,7 +387,7 @@ def fig_bland():
                 z = np.load(MODEL_RESULTS / m / f"{m}_{p}{'_' + tag if tag else ''}_predictions.npz")
                 diff = z["y_pred"][:, k] - z["y_true"][:, k]
                 bias[i, j] = diff.mean(); lim[i, j] = 1.96 * diff.std(ddof=1)
-        im = ax.imshow(np.abs(bias), cmap=cmap, vmin=0, vmax=vmax, aspect="auto")
+        im = ax.imshow(bias, cmap=cmap, vmin=-vmax, vmax=vmax, aspect="auto")
         for i in range(5):
             for j in range(4):
                 c = "white" if abs(bias[i, j]) > vmax * 0.75 else "black"
@@ -401,7 +407,7 @@ def fig_bland():
     fig.subplots_adjust(hspace=0.38, bottom=0.13)
     cax = fig.add_axes([0.25, 0.035, 0.5, 0.016])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal")
-    cb.set_label("Absolute bias (mmHg); the sign is printed in each cell")
+    cb.set_label("Bias, predicted minus reference (mmHg); blue = reads low, red = reads high")
     save(fig, "figS2_bland_altman")
 
 
