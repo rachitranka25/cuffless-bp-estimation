@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this code or these results, please cite the accompanying article."
-title: "Evaluation-Protocol Leakage in Cuffless Blood Pressure Estimation from PPG: How Much It Inflates Accuracy, and How Much Brief Personalization Recovers, Across Five Model Architectures"
+title: "Evaluation-Protocol Leakage and Personalization in PPG-Based Cuffless Blood Pressure Estimation: A Five-Architecture Study"
 type: software
 authors:
   - family-names: Ranka
