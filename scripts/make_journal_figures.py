@@ -31,13 +31,35 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from paths import MODEL_RESULTS, OVERVIEW, ROOT   # noqa: E402
 import viz                                         # noqa: E402
 import plot_results as PR                          # noqa: E402
+import plot_literature as PL                       # noqa: E402  (imports reset rcParams; keep them above)
 from literature import rows as published           # noqa: E402
 
 viz.use_style()
 mpl.rcParams.update({
     "font.size": 8.5, "axes.titlesize": 9, "axes.labelsize": 8.5,
     "xtick.labelsize": 8, "ytick.labelsize": 8, "legend.fontsize": 8,
+    # plain journal style: white ground, black text and axes, light grey grid
+    "figure.facecolor": "white", "axes.facecolor": "white", "savefig.facecolor": "white",
+    "text.color": "black", "axes.labelcolor": "black", "axes.titlecolor": "black",
+    "axes.edgecolor": "black", "xtick.color": "black", "ytick.color": "black",
+    "grid.color": "#e6e6e6",
 })
+# Monochrome palette: black, white and greys only (the colour palette of the
+# slide figures read as decorative in print).
+viz.SURFACE, viz.INK, viz.INK_2 = "white", "black", "black"
+viz.MUTED, viz.BLUE, viz.BAD = "#9e9e9e", "black", "black"
+GREY_SEEN = {"leaky": "#e3e3e3", "calbased": "#b0b0b0"}
+GREY_UNSEEN = {"calfree": "#5c5c5c", "aami": "black"}
+
+
+def title(ax, text, sub=None, fontsize=9, sub_fontsize=7.5):
+    """Centred black title, with an optional centred black subtitle a fixed gap below it."""
+    pad = 6
+    if sub:
+        ax.annotate(sub, xy=(0.5, 1), xycoords="axes fraction", xytext=(0, 4), textcoords="offset points",
+                    fontsize=sub_fontsize, color="black", ha="center", va="bottom", annotation_clip=False)
+        pad = 4 + 1.3 * sub_fontsize + 4
+    ax.set_title(text, loc="center", pad=pad, fontsize=fontsize, color="black", weight="bold")
 
 WIDTH = 6.5                     # inches, printed width
 OUT = OVERVIEW / "journal"
@@ -45,12 +67,12 @@ OUT.mkdir(parents=True, exist_ok=True)
 MODELS = PR.MODEL_ORDER
 LABEL = PR.MODEL_LABEL
 PROTOS = PR.PROTO_ORDER
-PCOLOR = PR.PROTO_COLOR
+PCOLOR = {**GREY_SEEN, **GREY_UNSEEN}
 PNAME = {"leaky": "leaky", "calbased": "calbased", "calfree": "calfree", "aami": "AAMI"}
 TICK = {"rf": "Random\nForest", "gb": "Gradient\nBoosting", "cnn": "1D-CNN", "resnet": "ResNet1D",
         "transformer": "Transformer"}
-MCOLOR = {"rf": viz.BLUE, "gb": viz.YELLOW, "cnn": viz.ORANGE, "resnet": viz.AQUA,
-          "transformer": viz.VIOLET}
+MCOLOR = {"rf": "black", "gb": "#3d3d3d", "cnn": "#6a6a6a", "resnet": "#8e8e8e", "transformer": "#ababab"}
+MMARK = {"rf": "o", "gb": "s", "cnn": "^", "resnet": "D", "transformer": "v"}
 
 
 def save(fig, name):
@@ -66,23 +88,23 @@ def save(fig, name):
 def fig_protocols():
     def box(ax, x, y, w, h, color, text, tcolor="white"):
         ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.04",
-                                    linewidth=0, facecolor=color, zorder=2))
+                                    linewidth=0.8, edgecolor="black", facecolor=color, zorder=2))
         ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=8,
                 color=tcolor, weight="bold", zorder=3, linespacing=1.35)
 
-    spec = [("Leaky", "random clips, any patient", viz.ORANGE, "Training pool",
-             "Test: random clips\n(patients also in training)", True, "white"),
-            ("Calibration-based", "held-out clips, same patients", viz.YELLOW, "Training pool",
-             "Test: held-out clips\n(patients also in training)", True, viz.INK),
-            ("Calibration-free", "144 unseen patients", viz.BLUE, "Training pool\n(1,164 patients)",
+    spec = [("Leaky", "random clips, any patient", GREY_SEEN["leaky"], "Training pool",
+             "Test: random clips\n(patients also in training)", True, "black"),
+            ("Calibration-based", "held-out clips, same patients", GREY_SEEN["calbased"], "Training pool",
+             "Test: held-out clips\n(patients also in training)", True, "black"),
+            ("Calibration-free", "144 unseen patients", GREY_UNSEEN["calfree"], "Training pool\n(1,164 patients)",
              "Test: 144 new\npatients", False, "white"),
-            ("AAMI", "116 unseen patients, full BP range", viz.AQUA, "Training pool\n(1,164 patients)",
-             "Test: 116 new patients\n(full BP range)", False, viz.INK)]
+            ("AAMI", "116 unseen patients, full BP range", GREY_UNSEEN["aami"], "Training pool\n(1,164 patients)",
+             "Test: 116 new patients\n(full BP range)", False, "white")]
     fig, axes = plt.subplots(2, 2, figsize=(WIDTH, 4.3))
     for ax, (name, sub, color, train, test, overlap, tcol) in zip(axes.flat, spec):
         ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
-        viz.title(ax, name, sub, fontsize=9, sub_fontsize=7.5)
-        box(ax, 0.06, 0.56, 0.88, 0.34, viz.INK_2, train)
+        title(ax, name, sub, fontsize=9, sub_fontsize=7.5)
+        box(ax, 0.06, 0.56, 0.88, 0.34, "white", train, "black")
         box(ax, 0.06, 0.06, 0.88, 0.34, color, test, tcol)
         if overlap:
             ax.add_patch(FancyArrowPatch((0.5, 0.56), (0.5, 0.40), arrowstyle="-|>",
@@ -111,7 +133,8 @@ def fig_gap(runs, target, name):
         for j, p in enumerate(PROTOS):
             xs = [i - 0.4 + width * (j + 0.5) for i in range(len(MODELS))]
             vals = [runs[(m, p)]["results"][target][key] for m in MODELS]
-            ax.bar(xs, vals, width=width * 0.9, color=PCOLOR[p], edgecolor="none", label=PNAME[p])
+            ax.bar(xs, vals, width=width * 0.9, color=PCOLOR[p], edgecolor="black", linewidth=0.5,
+                   label=PNAME[p])
             top = max(top, max(vals))
             for x, v in zip(xs, vals):
                 ax.text(x, v + top * 0.02, f"{v:.2f}" if key == "r" else f"{v:.1f}",
@@ -124,12 +147,13 @@ def fig_gap(runs, target, name):
         ax.set_xticks(range(len(MODELS)))
         ax.set_xticklabels([TICK[m] for m in MODELS])
         ax.set_ylabel(ylab)
-        viz.title(ax, f"{target.upper()}: {ttl}", sub, fontsize=9, sub_fontsize=7.5)
+        title(ax, f"{target.upper()}: {ttl}", sub, fontsize=9, sub_fontsize=7.5)
         viz.despine(ax)
         ax.grid(axis="x", visible=False)
-    axes[0].legend(ncol=4, loc="lower right", bbox_to_anchor=(1.0, 1.02), handlelength=1.2,
-                   columnspacing=1.0)
-    fig.subplots_adjust(hspace=0.62)
+    h, l = axes[0].get_legend_handles_labels()
+    fig.subplots_adjust(hspace=0.62, bottom=0.1)
+    fig.legend(h, l, ncol=4, loc="lower center", bbox_to_anchor=(0.5, 0.0), handlelength=1.2,
+               columnspacing=1.4, frameon=False)
     save(fig, name)
 
 
@@ -158,13 +182,13 @@ def fig_weighting():
 
     fig, (a, b) = plt.subplots(1, 2, figsize=(WIDTH, 3.0))
     names = [LABEL[m] for m in MODELS]
-    colors = [MCOLOR[m] for m in MODELS]
+    colors = ["#8a8a8a"] * len(MODELS)
     for ax, vals, ttl, sub, ylab in (
             (a, overall, "Cost: overall SBP error", "Weighted minus unweighted; positive = higher error",
              "Change in SBP MAE (mmHg)"),
             (b, high, "Benefit: SBP above 170 mmHg", "Weighted minus unweighted; negative = lower error",
              "Change in SBP MAE (mmHg)")):
-        bars = ax.bar(range(5), vals, color=colors, width=0.62)
+        bars = ax.bar(range(5), vals, color=colors, width=0.62, edgecolor="black", linewidth=0.5)
         ax.axhline(0, color=viz.INK_2, lw=0.7)
         span = max(vals) - min(min(vals), 0)
         for bb, v in zip(bars, vals):
@@ -175,7 +199,7 @@ def fig_weighting():
         ax.set_xticks(range(5)); ax.set_xticklabels(names, fontsize=7.5, rotation=30, ha="right",
                                                      rotation_mode="anchor")
         ax.set_ylabel(ylab)
-        viz.title(ax, ttl, sub, fontsize=9, sub_fontsize=7)
+        title(ax, ttl, sub, fontsize=9, sub_fontsize=7)
         viz.despine(ax); ax.grid(axis="x", visible=False)
     fig.subplots_adjust(wspace=0.38)
     save(fig, "fig4_weighting")
@@ -189,7 +213,6 @@ PUB_LABEL = {"DMT (Transformer)": "DMT (Shen et al.)",
 
 
 def fig_literature():
-    import plot_literature as PL
     data = []
     for lbl, s, d, mine in PL.rows("cal_free"):
         if mine:
@@ -203,8 +226,8 @@ def fig_literature():
         rows = sorted(data, key=lambda r: r[col])
         y = np.arange(len(rows))[::-1]
         vals = [r[col] for r in rows]
-        ax.barh(y, vals, height=0.62, color=[to_rgba(viz.ORANGE if r[3] else viz.BLUE, 1 if r[3] else .8)
-                                             for r in rows])
+        ax.barh(y, vals, height=0.62, color=["black" if r[3] else "#bdbdbd" for r in rows],
+                edgecolor="black", linewidth=0.5)
         for yy, v, r in zip(y, vals, rows):
             ax.text(v + max(vals) * 0.012, yy, f"{v:.2f}", va="center", fontsize=7.5,
                     weight="bold" if r[3] else "normal", color=viz.INK if r[3] else viz.INK_2)
@@ -215,7 +238,7 @@ def fig_literature():
         ax.set_xlim(0, max(vals) * 1.12)
         ax.set_xlabel("MAE (mmHg)")
         ax.grid(axis="y", visible=False)
-        viz.title(ax, ttl, "Orange: this study, unweighted, seed-0 runs; blue: published results",
+        title(ax, ttl, "Black: this study, unweighted, seed-0 runs; grey: published results",
                   fontsize=9, sub_fontsize=7.5)
         viz.despine(ax)
     fig.subplots_adjust(hspace=0.55)
@@ -243,8 +266,10 @@ def shift_rows():
 def fig_shift(rows):
     fig, ax = plt.subplots(figsize=(WIDTH, 3.2))
     x = np.arange(len(rows)); w = 0.36
-    ax.bar(x - w / 2, [r["shift_w"] for r in rows], w, color=viz.MUTED, label="With BP-bin weighting (primary)")
-    ax.bar(x + w / 2, [r["shift_u"] for r in rows], w, color=viz.BLUE, label="Without BP-bin weighting")
+    ax.bar(x - w / 2, [r["shift_w"] for r in rows], w, color="#c4c4c4", edgecolor="black", linewidth=0.5,
+           label="With BP-bin weighting (primary)")
+    ax.bar(x + w / 2, [r["shift_u"] for r in rows], w, color="black", edgecolor="black", linewidth=0.5,
+           label="Without BP-bin weighting")
     top = max(r["shift_w"] for r in rows)
     for i, r in enumerate(rows):
         ax.text(i - w / 2, r["shift_w"] + top * 0.02, f"+{r['shift_w']:.1f}", ha="center", fontsize=7.5,
@@ -254,15 +279,14 @@ def fig_shift(rows):
         d = r["shift_w"] - r["shift_u"]
         ax.text(i, max(r["shift_w"], r["shift_u"]) + top * 0.11,
                 f"{d:.1f} ({d / r['shift_w'] * 100:.0f}%)", ha="center", fontsize=7.5,
-                color=viz.BAD)
+                color="black", style="italic")
     ax.set_xticks(x); ax.set_xticklabels([TICK[r["model"]] for r in rows])
     ax.set_ylabel("PPG-DaLiA minus PulseDB\nmean predicted SBP (mmHg)")
-    ax.set_ylim(0, top * 1.48)
+    ax.set_ylim(0, top * 1.66)
     handles = ax.get_legend_handles_labels()[0] + [
         Line2D([], [], ls="none", marker="$\\mathrm{x}$", color=viz.BAD, ms=0,
-               label="Red: shift due to weighting, mmHg (% of weighted shift)")]
-    leg = ax.legend(handles=handles, loc="upper left", ncol=2, handlelength=1.2)
-    leg.get_texts()[-1].set_color(viz.BAD)
+               label="Italic: shift due to weighting, mmHg (% of weighted shift)")]
+    leg = ax.legend(handles=handles, loc="upper left", ncol=1, handlelength=1.2)
     viz.despine(ax); ax.grid(axis="x", visible=False)
     save(fig, "fig6_shift")
 
@@ -307,16 +331,16 @@ def fig_personalization():
             for pick, curve in d["curves"].items():
                 k = [r["shots"] for r in curve]
                 v = [r["results"][target]["mae"] for r in curve]
-                ax.plot(k, v, ls=style[pick], color=MCOLOR[m], lw=1.3, marker="o", ms=2.6)
+                ax.plot(k, v, ls=style[pick], color=MCOLOR[m], lw=1.1, marker=MMARK[m], ms=3.2)
     for ax, target in zip(axes, ("SBP", "DBP")):
         ax.set_ylabel(f"{target} MAE (mmHg)")
         ax.set_xticks([0, 1, 3, 5, 10, 25])
-        viz.title(ax, f"{target}, naive split", "k = 0 is the uncalibrated model", fontsize=9, sub_fontsize=7.5)
+        title(ax, f"{target}, naive split", "k = 0 is the uncalibrated model", fontsize=9, sub_fontsize=7.5)
         viz.despine(ax)
     axes[1].set_xlabel("Calibration clips per subject (k)")
-    mh = [Line2D([], [], color=MCOLOR[m], lw=1.6, label=LABEL[m]) for m in MODELS]
+    mh = [Line2D([], [], color=MCOLOR[m], lw=1.3, marker=MMARK[m], ms=4, label=LABEL[m]) for m in MODELS]
     rule = {"first": "first clips (storage order)", "random": "random clips", "spread": "clips spread over BP range"}
-    sh = [Line2D([], [], color=viz.INK_2, lw=1.3, ls=s, label=rule[p]) for p, s in style.items()]
+    sh = [Line2D([], [], color="black", lw=1.3, ls=s, label=rule[p]) for p, s in style.items()]
     fig.legend(handles=mh + sh, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.1), frameon=False)
     fig.subplots_adjust(hspace=0.35)
     save(fig, "fig8_personalization")
@@ -334,7 +358,7 @@ def fig_training():
             ax.plot(ep, [q["val_loss"] for q in h], color=viz.BLUE, lw=1.4, label="validation")
             best = min(h, key=lambda q: q["val_loss"])["epoch"]
             ax.axvline(best, ls=":", lw=1.0, color=viz.BAD, label="best validation epoch")
-            viz.title(ax, f"{LABEL[m]}, {PNAME[p]}", fontsize=8.5)
+            title(ax, f"{LABEL[m]}, {PNAME[p]}", fontsize=8.5)
             if col == 0:
                 ax.set_ylabel("Loss")
             if row == 3:
@@ -346,7 +370,8 @@ def fig_training():
 
 
 def fig_bland():
-    cmap = mpl.colormaps["RdBu_r"]; vmax = 12.0
+    from matplotlib.colors import LinearSegmentedColormap
+    cmap = LinearSegmentedColormap.from_list("white_grey", ["white", "#6e6e6e"]); vmax = 12.0
     fig, axes = plt.subplots(2, 1, figsize=(WIDTH, 7.0))
     for ax, (t, k) in zip(axes, (("SBP", 0), ("DBP", 1))):
         bias = np.full((5, 4), np.nan); lim = np.full((5, 4), np.nan)
@@ -356,10 +381,10 @@ def fig_bland():
                 z = np.load(MODEL_RESULTS / m / f"{m}_{p}{'_' + tag if tag else ''}_predictions.npz")
                 diff = z["y_pred"][:, k] - z["y_true"][:, k]
                 bias[i, j] = diff.mean(); lim[i, j] = 1.96 * diff.std(ddof=1)
-        im = ax.imshow(bias, cmap=cmap, vmin=-vmax, vmax=vmax, aspect="auto")
+        im = ax.imshow(np.abs(bias), cmap=cmap, vmin=0, vmax=vmax, aspect="auto")
         for i in range(5):
             for j in range(4):
-                c = "white" if abs(bias[i, j]) > vmax * 0.55 else viz.INK
+                c = "white" if abs(bias[i, j]) > vmax * 0.75 else "black"
                 b = round(float(bias[i, j]), 1) + 0.0   # no "-0.0"
                 ax.text(j, i, f"{b:+.1f} ± {lim[i, j]:.0f}" if b else f"0.0 ± {lim[i, j]:.0f}",
                         ha="center", va="center",
@@ -371,12 +396,12 @@ def fig_bland():
         ax.tick_params(which="both", length=0)
         for s in ax.spines.values():
             s.set_visible(False)
-        viz.title(ax, f"{t} agreement", "Cell: bias ± 95% limits of agreement (mmHg)",
+        title(ax, f"{t} agreement", "Cell: bias ± 95% limits of agreement (mmHg)",
                   fontsize=9, sub_fontsize=7.5)
     fig.subplots_adjust(hspace=0.38, bottom=0.13)
     cax = fig.add_axes([0.25, 0.035, 0.5, 0.016])
     cb = fig.colorbar(im, cax=cax, orientation="horizontal")
-    cb.set_label("Bias, predicted minus reference (mmHg)")
+    cb.set_label("Absolute bias (mmHg); the sign is printed in each cell")
     save(fig, "figS2_bland_altman")
 
 
