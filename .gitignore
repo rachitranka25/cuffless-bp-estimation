@@ -16,8 +16,6 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 
-# Local tooling, not part of the project
-
 # Manuscript drafts — not part of the code release; still under journal
 # review, kept out of the public repo until that's resolved.
 docs/
