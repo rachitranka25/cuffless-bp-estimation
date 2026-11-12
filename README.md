@@ -12,7 +12,9 @@ step recover?
 
 **Authors.** Rachit Ranka, Harshit Tandon (Chandigarh University), Muammar Sadrawi
 (Universitas Bio Scientia Internasional Indonesia) and Bhekumuzi M. Mathunjwa (Yuan Ze
-University; corresponding author). The manuscript is in preparation for submission; see
+University; corresponding author). The manuscript was submitted to *Biomedical Signal
+Processing and Control* in November 2026 and is under review. This release is archived on
+Zenodo: [doi:10.5281/zenodo.24162376](https://doi.org/10.5281/zenodo.24162376); see
 [`CITATION.cff`](CITATION.cff) for how to cite this repository.
 
 **Results live in [`results/overview/RESULTS.md`](results/overview/RESULTS.md)**, generated
@@ -212,8 +214,8 @@ Complete. All five models (RF, GB, 1D-CNN, ResNet1D, Transformer) are trained an
 under all four protocols, three seeds each where noted; the leakage gap and the PPG-DaLiA
 domain-shift control are measured; few-shot personalization is evaluated under both a
 naive (storage-order) and a genuinely chronological calibration/evaluation split; and the
-manuscript is written and in preparation for journal submission (not included in this
-repository until it is published).
+manuscript has been submitted to *Biomedical Signal Processing and Control* and is under
+review (not included in this repository until it is published).
 
 Current numbers, and how to reproduce each one, are in
 [`results/overview/RESULTS.md`](results/overview/RESULTS.md).
