@@ -17,4 +17,6 @@ authors:
     affiliation: "Department of Mechanical Engineering, Yuan Ze University, Taoyuan, Taiwan"
     email: bmmathunjwa@saturn.yzu.edu.tw
 repository-code: "https://github.com/rachitranka25/cuffless-bp-estimation"
-license: MIT
+license:
+  - MIT
+  - CC-BY-NC-SA-4.0

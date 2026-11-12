@@ -184,6 +184,10 @@ python3 scripts/evaluate_rfgb_dalia.py        # rf/gb PPG-DaLiA domain-shift che
 # reproducibility checks (fast — seconds to a few minutes, no training)
 python3 scripts/test_subject_disjointness.py  # verifies every protocol's leakage property
 python3 scripts/bootstrap_ci.py               # patient-level bootstrap CIs + gap significance test
+python3 scripts/verify_personalization.py     # recomputes every personalization cell in the paper
+                                              # from the saved predictions, using src/train.py
+python3 scripts/personalization_early_vs_late.py  # naive vs chronological split, every k
+python3 scripts/personalization_bootstrap.py  # patient-level bootstrap for personalization at k=25
 
 # Colab, for the deep models
 python3 scripts/make_drive_folder.py        # assembles bp/ to drag into Drive
@@ -192,6 +196,7 @@ python3 scripts/build_notebooks.py          # regenerates the launcher notebooks
 # reporting
 python3 scripts/plot_results.py             # figures, from whatever has been run
 python3 scripts/make_results_report.py      # results/overview/RESULTS.md
+python3 scripts/make_journal_figures.py     # manuscript figures, results/overview/journal/
 
 # dataset figures
 python3 scripts/visualize_processed.py
@@ -237,3 +242,12 @@ copy of those files.
 `results/models/<model>/` holds the output of every run (metrics, per-clip predictions,
 and checkpoints for the deep models), which is what the manuscript's numbers are computed
 from.
+
+## Licence
+
+Code is released under the MIT License ([`LICENSE`](LICENSE)). Model checkpoints,
+per-clip predictions, metrics and figures were produced from PulseDB's VitalDB subset,
+which is licensed CC BY-NC-SA 4.0, so they are released under that same licence and are
+for non-commercial use only; see [`LICENSE-DATA.md`](LICENSE-DATA.md) for the exact list
+of files and the dataset citations. No PulseDB, VitalDB or PPG-DaLiA signals are included;
+download them from the sources in [The data](#the-data).
