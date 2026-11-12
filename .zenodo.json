@@ -1,0 +1,13 @@
+{
+  "title": "Evaluation-Protocol Leakage and Personalization in PPG-Based Cuffless Blood Pressure Estimation: A Five-Architecture Study (code and results)",
+  "upload_type": "software",
+  "description": "Code, trained model checkpoints, per-clip predictions and verification scripts for the manuscript \"Evaluation-Protocol Leakage and Personalization in PPG-Based Cuffless Blood Pressure Estimation: A Five-Architecture Study\". The code (src/, scripts/, notebooks/) is released under the MIT License. Model checkpoints, predictions, metrics and figures were produced from PulseDB's VitalDB subset (CC BY-NC-SA 4.0) and are released under CC BY-NC-SA 4.0; see LICENSE-DATA.md. No PulseDB, VitalDB or PPG-DaLiA signals are included.",
+  "creators": [
+    {"name": "Ranka, Rachit", "affiliation": "Department of Computer Science Engineering, Chandigarh University, Mohali, India"},
+    {"name": "Tandon, Harshit", "affiliation": "Department of Computer Science Engineering, Chandigarh University, Mohali, India"},
+    {"name": "Sadrawi, Muammar", "affiliation": "Department of Biotechnology, Universitas Bio Scientia Internasional Indonesia, Jakarta, Indonesia"},
+    {"name": "Mathunjwa, Bhekumuzi M.", "affiliation": "Department of Mechanical Engineering, Yuan Ze University, Taoyuan, Taiwan"}
+  ],
+  "license": "cc-by-nc-sa-4.0",
+  "keywords": ["Cuffless blood pressure", "Photoplethysmography", "Evaluation leakage", "Personalization", "Wearable sensors"]
+}
